@@ -1,0 +1,9 @@
+{
+  "name": "dansk-esim-bot",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": { "dev": "tsx watch src/bot.ts", "start": "tsx src/bot.ts" },
+  "dependencies": { "dotenv": "^16.4.7", "grammy": "^1.35.0" },
+  "devDependencies": { "tsx": "^4.19.2", "typescript": "^5.7.2" }
+}
