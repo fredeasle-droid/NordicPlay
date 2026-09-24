@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#090909">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <title>DANSK eSIM — NO VERIFICATION</title>
 <style>
 :root{--bg:#070707;--panel:#101010;--panel2:#151515;--red:#ff2438;--red2:#ff5262;--muted:#929292;--line:#272727;--text:#f7f7f7;--green:#39d98a}
@@ -22,10 +23,10 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 </head>
 <body>
 <div class="app">
-<header><div class="brand"><i>◉</i> DANSK eSIM</div><div class="status"><span class="dot"></span>ONLINE</div></header>
+<header><div class="brand"><i>◉</i> DANSK eSIM</div><div class="status"><span class="dot"></span><span id="tgStatus">TELEGRAM</span></div></header>
 <main>
 <section id="home" class="screen active">
-  <div class="hero"><span class="pill">🇩🇰 +45 · TELEGRAM FIRST</span><div class="title">Dit danske nummer.<br>Direkte i din eSIM.</div><p class="sub">Vælg en løsning, bestil og modtag din eSIM digitalt. Priser og provider kobles på senere.</p><button class="btn" onclick="show('esim')">Køb eSIM →</button></div>
+  <div class="hero"><span class="pill">🇩🇰 +45 · TELEGRAM MINI APP</span><div class="title">Dit danske nummer.<br>Direkte i din eSIM.</div><p class="sub">Vælg en løsning, bestil og modtag din eSIM digitalt. Priser og provider kobles på senere.</p><button class="btn" onclick="show('esim')">Køb eSIM →</button></div>
   <div class="grid">
     <div class="card redline" onclick="show('verification')"><div class="icon">🔐</div><h3>App Verification</h3><p>Engangsverifikation via SMS til understøttede tjenester.</p></div>
     <div class="card" onclick="show('credits')"><div class="icon">💳</div><h3>Credits</h3><p>Gem credits på kontoen og brug dem, når du vil.</p></div>
@@ -85,8 +86,19 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 <div class="toast" id="toast"></div>
 </div>
 <script>
+const tg=window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand();tg.setHeaderColor("#080808");tg.setBackgroundColor("#050505");}
 function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));window.scrollTo({top:0,behavior:'smooth'})}
 function selectOpt(el){const p=el.parentElement;p.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));el.classList.add('selected')}
+async function connectTelegram(){
+  if(!tg){toast('Åbn DANSK eSIM fra Telegram');return;}
+  try{
+    const res=await fetch('/api/auth/telegram',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({initData:tg.initData})});
+    if(res.ok){toast('Telegram-konto forbundet');}
+    else{toast('Telegram-login afventer backend');}
+  }catch(e){toast('Backend er ikke tilsluttet endnu');}
+}
+if(tg){connectTelegram();}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>t.style.display='none',2200)}
 </script>
 </body>
