@@ -1,0 +1,1 @@
+export function adminAuthorized(header:string, secret:string){return Boolean(secret)&&header==="Bearer "+secret}
