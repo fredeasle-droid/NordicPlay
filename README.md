@@ -1,25 +1,24 @@
 # DANSK eSIM
 
-V1 shell for the Telegram/Mini App experience.
+Telegram-first eSIM + App Verification platform.
 
-## Design
-- Black / dark UI
-- Neon red accent
-- Danish language
-- Mobile-first
-- Same visual language across eSIM and App Verification
+## Current architecture
+- Telegram Bot
+- Telegram Mini App frontend
+- Fastify/TypeScript backend
+- Server-side Telegram WebApp authentication
+- Provider adapter architecture
+- Minimal customer data model
+- Admin API scaffold
+- No secrets committed
 
-## Current state
-The UI is intentionally provider-agnostic. Prices, provider credentials and payment details are configuration placeholders.
-
-## Next integrations
-1. Telegram Mini App authentication
-2. Backend/API
-3. eSIM provider provisioning
-4. Verification provider API
-5. Manual crypto payment verification
-6. Admin dashboard
-7. Subscription renewal/deactivation
-8. Secure deletion/deactivation workflow
-
-Do not put provider secrets, wallet private keys or API secrets in frontend files.
+## Production order
+1. Connect persistent PostgreSQL database
+2. Deploy backend
+3. Configure Telegram bot + Mini App URL
+4. Build admin UI
+5. Connect eSIM provider
+6. Connect verification provider
+7. Implement compliant payment flow
+8. Add subscription renewal/deactivation jobs
+9. End-to-end test
