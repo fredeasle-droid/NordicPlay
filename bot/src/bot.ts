@@ -2,11 +2,13 @@ import {Bot,InlineKeyboard} from "grammy";import "dotenv/config";
 const token=process.env.TELEGRAM_BOT_TOKEN;if(!token)throw new Error("TELEGRAM_BOT_TOKEN is required");
 const bot=new Bot(token);const miniAppUrl=process.env.MINI_APP_URL;
 const menu=()=>{const k=new InlineKeyboard();if(miniAppUrl)k.webApp("🔴 ÅBN DANSK eSIM",miniAppUrl);k.row().text("📦 Mine ordrer","orders").text("📱 Mit nummer","number");k.row().text("💳 Credits","credits").text("💬 Support","support");return k};
+async function configure(){if(!miniAppUrl)return;await bot.api.setChatMenuButton({menu_button:{type:"web_app",text:"🔴 DANSK eSIM",web_app:{url:miniAppUrl}}});}
 bot.command("start",async ctx=>ctx.reply("🇩🇰 *DANSK eSIM*\n\nDin digitale adgang til danske eSIM-løsninger og App Verification.",{parse_mode:"Markdown",reply_markup:menu()}));
+bot.command("help",async ctx=>ctx.reply("Brug menuen eller åbn DANSK eSIM for at bestille, se ordrer og håndtere credits.",{reply_markup:menu()}));
 bot.command("menu",async ctx=>ctx.reply("Hovedmenu:",{reply_markup:menu()}));
 bot.command("orders",async ctx=>ctx.reply("Åbn Mini App'en for at se dine ordrer.",{reply_markup:menu()}));
 bot.command("number",async ctx=>ctx.reply("Åbn Mini App'en for at se dit aktive nummer.",{reply_markup:menu()}));
 bot.command("credits",async ctx=>ctx.reply("Åbn Mini App'en for at se og købe credits.",{reply_markup:menu()}));
 bot.command("support",async ctx=>ctx.reply("Support kommer her.",{reply_markup:menu()}));
 for(const [data,msg] of [["orders","📦 Mine ordrer åbnes i Mini App'en."],["number","📱 Dit nummer åbnes i Mini App'en."],["credits","💳 Credits åbnes i Mini App'en."],["support","💬 Support åbnes i Mini App'en."]] as const)bot.callbackQuery(data,async ctx=>{await ctx.answerCallbackQuery();await ctx.reply(msg,{reply_markup:menu()})});
-bot.catch(err=>console.error("Bot error",err));await bot.start();
+bot.catch(err=>console.error("Bot error",err));await configure();await bot.start();
