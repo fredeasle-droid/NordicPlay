@@ -296,7 +296,7 @@ async function loadAccountData(){
 }
 async function loadPrivacy(){try{const r=await fetch('/api/privacy');const d=await r.json();if(d.ok)document.getElementById('privacyContent').insertAdjacentHTML('beforeend','<div class="notice">'+escapeHtml(d.note)+'</div>')}catch{}}
 async function loadStatus(){try{const r=await fetch('/api/service-status');const d=await r.json();const el=document.getElementById('statusList');if(!el||!d.components)return;el.innerHTML=Object.entries(d.components).map(([k,v])=>'<div class="listitem"><b>🟢 '+escapeHtml(k)+'</b><small>'+escapeHtml(String(v))+'</small></div>').join('')}catch{}}
-async function copyReferral(){const link=tg?('https://t.me/'+(window.botUsername||'')+'?start=ref_'+tg.initDataUnsafe?.user?.id):'';if(link)try{await navigator.clipboard.writeText(link);toast('Henvisningslink kopieret')}catch{toast('Henvisningslink kan ikke kopieres endnu')}else toast('Referral aktiveres, når bot-linket er konfigureret')}
+async function copyReferral(){if(!tg){toast('Åbn Mini Appen fra Telegram');return}try{const r=await fetch('/api/referral',{headers:{authorization:'tma '+tg.initData}});const d=await r.json();if(!d.link){toast('Referral-link afventer bot-konfiguration');return}await navigator.clipboard.writeText(d.link);toast('Henvisningslink kopieret')}catch{toast('Referral-link kunne ikke hentes')}}
 function savePushPreference(enabled){localStorage.setItem('pushEnabled',enabled?'1':'0');toast(enabled?'Telegram-notifikationer aktiveret':'Telegram-notifikationer deaktiveret');if(tg)fetch('/api/notifications/preferences',{method:'POST',headers:{'content-type':'application/json','authorization':'tma '+tg.initData},body:JSON.stringify({enabled})}).catch(()=>{})}
 
 loadVerificationServices();
