@@ -22,7 +22,26 @@ app.get("/",async(_req,reply)=>{
   }
 });
 app.get("/health",async()=>({ok:true,service:"dansk-esim-api",version:"0.5.0"}));
+let verificationCache:{at:number,services:Array<{code:string,name:string,count?:number}>}|null=null;
+async function getNumberOtpServices(){
+  if(verificationCache && Date.now()-verificationCache.at<5*60*1000) return verificationCache.services;
+  const r=await fetch("https://api.numberotp.com/v1/public/services",{headers:{"accept":"application/json"}});
+  if(!r.ok) throw new Error("NumberOTP services request failed: "+r.status);
+  const j=await r.json() as any;
+  const services=Array.isArray(j?.data?.services)?j.data.services.map((x:any)=>({code:String(x.code),name:String(x.name),count:Number.isFinite(Number(x.count))?Number(x.count):undefined})).filter((x:any)=>x.code&&x.name):[];
+  verificationCache={at:Date.now(),services};
+  return services;
+}
 app.get("/api/catalog",async()=>catalog);
+app.get("/api/verification/services",async(_req,reply)=>{
+  try{
+    const services=await getNumberOtpServices();
+    return {ok:true,source:"numberotp",updatedAt:new Date(verificationCache!.at).toISOString(),count:services.length,services};
+  }catch(error){
+    app.log.error(error);
+    return reply.code(502).send({ok:false,error:"verification_catalog_unavailable"});
+  }
+});
 app.post("/api/auth/telegram",async(req,reply)=>{if(!token)return reply.code(503).send({ok:false,error:"telegram_token_not_configured"});const body=req.body as {initData?:string};const user=body?.initData?verifyTelegramInitData(body.initData,token):null;if(!user)return reply.code(401).send({ok:false,error:"invalid_telegram_init_data"});return {ok:true,user:db.user(user.telegramUserId)}});
 app.get("/api/me",async(req,reply)=>{const user=auth(req);if(!user)return reply.code(401).send({ok:false,error:"unauthorized"});return {ok:true,user:db.user(user.telegramUserId),orders:db.ordersByUser(user.telegramUserId)}});
 app.post("/api/orders",async(req,reply)=>{const user=auth(req);if(!user)return reply.code(401).send({ok:false,error:"unauthorized"});const body=req.body as {productId?:string};const p=catalog.esim.sms.find(x=>x.id===body?.productId);if(!p)return reply.code(400).send({ok:false,error:"invalid_product"});const o={id:"DES-"+Date.now()+"-"+crypto.randomBytes(3).toString("hex"),telegramUserId:user.telegramUserId,productId:p.id,amountDkk:p.monthlyPrice,status:"pending_payment",createdAt:new Date().toISOString()};return {ok:true,order:db.saveOrder(o)}});
