@@ -12,7 +12,7 @@ const app=Fastify({logger:true});
 await app.register(cors,{origin:true});
 const token=process.env.TELEGRAM_BOT_TOKEN;
 const adminSecret=process.env.ADMIN_SECRET;
-const adminChatId=process.env.ADMIN_CHAT_ID;
+const adminChatId=process.env.ADMIN_CHAT_ID;\nconst botUsername=process.env.BOT_USERNAME??"";
 
 const catalog={
   esim:{
@@ -131,7 +131,7 @@ app.get("/api/recent",async(req,reply)=>{const u=auth(req);if(!u)return reply.co
 app.get("/api/credits/history",async(req,reply)=>{const u=auth(req);if(!u)return reply.code(401).send({ok:false,error:"unauthorized"});return {ok:true,balance:db.user(u.telegramUserId).credits,history:db.creditHistory(u.telegramUserId)}});
 app.get("/api/service-status",async()=>({ok:true,status:"operational",components:{platform:"operational",telegram:"operational",verification:"provider-dependent",esim:"provider-dependent",payments:"manual-review"}}));
 app.get("/api/privacy",async()=>({ok:true,principles:["Dataminimering","Ingen unødvendig ID-upload i eget flow","Ingen rich identity profiling","Kunde kan anmode om deaktivering/sletning af aktiv platformdata"],note:"Provider-, betalings-, Telegram- og lovpligtige opbevaringskrav kan stadig gælde."}));
-app.get("/api/how-it-works",async()=>({ok:true,steps:["Vælg produkt","Betal","Ordren godkendes","Provider leverer eller aktiverer tjenesten","Se status i Mini App"]}));
+app.get("/api/how-it-works",async()=>({ok:true,steps:["Vælg produkt","Betal","Ordren godkendes","Provider leverer eller aktiverer tjenesten","Se status i Mini App"]}));\napp.get("/api/referral",async(req,reply)=>{\n  const u=auth(req);if(!u)return reply.code(401).send({ok:false,error:"unauthorized"});\n  const code=crypto.createHash("sha256").update(u.telegramUserId+String(process.env.REFERRAL_SALT??"dansk-esim")).digest("hex").slice(0,10);\n  return {ok:true,code,link:botUsername?"https://t.me/"+botUsername+"?start=ref_"+code:null};\n});
 
 app.get("/api/admin/orders",async(req,reply)=>{
   if(!adminAuthorized(String(req.headers.authorization??""),adminSecret??""))return reply.code(401).send({ok:false,error:"unauthorized"});
