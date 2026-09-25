@@ -62,9 +62,9 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 
 <section id="order" class="screen"><button class="back" onclick="show('delivery')">← Tilbage</button><div class="eyebrow">Ordre</div><div class="title">Tjek din bestilling</div>
 <div class="summary"><div class="sumrow"><span>Produkt</span><b>Dansk eSIM · Med SMS</b></div><div class="sumrow"><span>Abonnement</span><b>500 kr./md.</b></div><div class="sumrow"><span>Levering</span><b>Express</b></div><div class="sumrow"><span>Kanal</span><b>Telegram</b></div><div class="sumrow"><span>Total</span><b class="total">500 kr.</b></div></div>
-<div class="notice">Dette er en forhåndsvisning. Den endelige pris og leverandørintegration kan ændres, når vores aftaler er på plads.</div><button class="btn" onclick="show('payment')">Fortsæt til betaling →</button></section>
+<div class="notice">Dette er en forhåndsvisning. Den endelige pris og leverandørintegration kan ændres, når vores aftaler er på plads.</div><button class="btn" onclick="createOrder()">Fortsæt til betaling →</button></section>
 
-<section id="payment" class="screen"><button class="back" onclick="show('order')">← Tilbage</button><div class="eyebrow">Betaling</div><div class="title">Betal din ordre</div><div class="summary"><div class="sumrow"><span>Ordre-ID</span><b>DES-2026-0001</b></div><div class="sumrow"><span>Beløb</span><b class="total">500 kr.</b></div></div>
+<section id="payment" class="screen"><button class="back" onclick="show('order')">← Tilbage</button><div class="eyebrow">Betaling</div><div class="title">Betal din ordre</div><div class="summary"><div class="sumrow"><span>Ordre-ID</span><b id="paymentOrderId">Afventer</b></div><div class="sumrow"><span>Beløb</span><b class="total" id="paymentAmount">Afventer</b></div></div>
 <div class="option selected" style="margin-top:12px"><div><b>₿ Crypto</b><div class="mini">Betalingsadresse og netværk vises ved næste trin.</div></div><i class="check"></i></div>
 <button class="btn" onclick="show('proof')">Vis betalingsoplysninger →</button></section>
 
@@ -168,11 +168,37 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 <script>
 const tg=window.Telegram?.WebApp;
 if(tg){tg.ready();tg.expand();tg.setHeaderColor("#080808");tg.setBackgroundColor("#050505");}
-function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));window.scrollTo({top:0,behavior:'smooth'})}
-function selectOpt(el){const p=el.parentElement;p.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));el.classList.add('selected')}
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));if(id==='order')updateOrderPreview();if(id==='payment')refreshPayment();window.scrollTo({top:0,behavior:'smooth'})}
+window.selectedEsim={productId:'sms_1',label:'Dansk eSIM · Med SMS',price:500};
+function selectOpt(el){
+ const p=el.parentElement;p.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');
+ const text=el.innerText;
+ if(/1 nummer/.test(text)&&/500/.test(text))window.selectedEsim={productId:'sms_1',label:'Dansk eSIM · Med SMS',price:500};
+ else if(/2 numre/.test(text))window.selectedEsim={productId:'sms_2',label:'Dansk eSIM · Med SMS · 2 numre',price:800};
+ else if(/3 numre/.test(text))window.selectedEsim={productId:'sms_3',label:'Dansk eSIM · Med SMS · 3 numre',price:1100};
+ else if(/Uden SMS/.test(text)){window.selectedEsim={productId:null,label:'Uden SMS',price:null};toast('Minutpakker kommer, når priserne er fastlagt')}
+}
+function updateOrderPreview(){
+ const p=window.selectedEsim;
+ const rows=document.querySelectorAll('#order .sumrow');
+ if(rows.length>=5){rows[0].querySelector('b').textContent=p.label;rows[1].querySelector('b').textContent=p.price?new Intl.NumberFormat('da-DK').format(p.price)+' kr./md.':'Pris senere';rows[4].querySelector('b').textContent=p.price?new Intl.NumberFormat('da-DK').format(p.price)+' kr.':'Pris senere'}
+}
+async function createOrder(){
+ if(!tg){toast('Åbn Mini Appen fra Telegram');return}
+ const p=window.selectedEsim;if(!p.price){toast('Dette produkt kan først bestilles, når minutpriserne er klar');return}
+ try{
+  const r=await fetch('/api/orders',{method:'POST',headers:{'content-type':'application/json',authorization:'tma '+tg.initData},body:JSON.stringify({productId:p.productId})});
+  const d=await r.json();
+  if(!r.ok){toast('Kunne ikke oprette ordre');return}
+  window.currentOrder=d.order;
+  if(d.firstPurchaseDiscount)toast('50% velkomstrabat er anvendt');
+  show('payment');
+ }catch{toast('Backend er ikke tilgængelig')}
+}
 function selectService(name){toast(name+' valgt');show('verifycountry')}
 function filterServices(q){const s=String(q||'').trim().toLowerCase();let visible=0;document.querySelectorAll('#serviceGrid .service').forEach(el=>{const ok=!s||el.dataset.name.toLowerCase().includes(s);el.classList.toggle('hidden',!ok);if(ok)visible++});const count=document.getElementById('serviceCount');if(count)count.textContent=visible+' services'}
-async function connectTelegram(){
+async function refreshPayment(){const o=window.currentOrder;if(o){document.getElementById('paymentOrderId').textContent=o.id;document.getElementById('paymentAmount').textContent=new Intl.NumberFormat('da-DK').format(o.amountDkk)+' kr.'}}
+
   if(!tg){toast('Åbn DANSK eSIM fra Telegram');return;}
   try{
     const res=await fetch('/api/auth/telegram',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({initData:tg.initData})});
