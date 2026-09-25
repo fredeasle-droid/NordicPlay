@@ -328,9 +328,26 @@ function renderVerificationServices(query){
     const card=document.createElement('div');
     card.className='card service';
     card.dataset.name=s.name;
+
     const icon=document.createElement('div');
-    icon.className='icon';
-    icon.textContent=verificationIcon(s.name);
+    icon.className='service-logo';
+
+    const img=document.createElement('img');
+    img.alt=String(s.name||'')+' logo';
+    img.loading='lazy';
+    img.decoding='async';
+    img.src=logoUrl(s.name,s.code);
+    img.onerror=function(){
+      if(this.dataset.fallback==='domain') {
+        this.onerror=null;
+        this.src=fallbackLogo(s.name);
+        return;
+      }
+      this.dataset.fallback='domain';
+      this.src=domainLogoUrl(s.name,s.code);
+    };
+    icon.appendChild(img);
+
     const h=document.createElement('h3');
     h.textContent=s.name;
     const p=document.createElement('p');
