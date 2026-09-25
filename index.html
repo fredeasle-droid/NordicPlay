@@ -300,6 +300,20 @@ async function loadVerificationServices(){
     if(count)count.textContent='Servicekatalog midlertidigt utilgængeligt';
   }
 }
+function verificationIcon(name){
+  const n=String(name||'').trim().toLowerCase();
+  const icons={
+    whatsapp:'🟢',telegram:'✈️',instagram:'📸',tiktok:'🎵',facebook:'🔵',google:'G',
+    discord:'🎮',snapchat:'👻','x':'𝕏','x twitter':'𝕏',microsoft:'▦','microsoft outlook':'▦',
+    apple:'','apple icloud':'',amazon:'🛒',paypal:'💳',steam:'🎮',spotify:'🎧',
+    uber:'🚕',bolt:'⚡',airbnb:'🏠',linkedin:'in',reddit:'👽',twitch:'◈',pinterest:'📌',
+    viber:'📞',wechat:'💬',signal:'🔵',line:'💚',kakaotalk:'💛',yahoo:'Y!',yandex:'Я',
+    binance:'₿',bybit:'₿',coinbase:'◉',okx:'◌',klarna:'K',revolut:'R',zalando:'Z',
+    ebay:'🛍️',aliexpress:'🛒','booking.com':'B',indeed:'i',canva:'C',notion:'N',
+    github:'◒',gitlab:'◢',openai:'◎',chatgpt:'◎',zoom:'Z',skype:'S'
+  };
+  return icons[n]||'◆';
+}
 function renderVerificationServices(query){
   const grid=document.getElementById('serviceGrid');
   const count=document.getElementById('serviceCount');
@@ -313,28 +327,15 @@ function renderVerificationServices(query){
   shown.forEach(s=>{
     const card=document.createElement('div');
     card.className='card service';
-    const logo=document.createElement('div');
-    logo.className='service-logo';
-    const img=document.createElement('img');
-    img.loading='lazy';
-    img.src=logoUrl(s.name,s.code);
-    img.alt='';
-    img.dataset.logoFallback='0';
-    img.onerror=()=>{
-      if(img.dataset.logoFallback==='0'){
-        img.dataset.logoFallback='1';
-        img.src=domainLogoUrl(s.name,s.code);
-      }else{
-        img.onerror=null;
-        img.src=fallbackLogo(s.name);
-      }
-    };
-    logo.appendChild(img);
+    card.dataset.name=s.name;
+    const icon=document.createElement('div');
+    icon.className='icon';
+    icon.textContent=verificationIcon(s.name);
     const h=document.createElement('h3');
     h.textContent=s.name;
     const p=document.createElement('p');
     p.textContent='SMS-verifikation';
-    card.append(logo,h,p);
+    card.append(icon,h,p);
     card.addEventListener('click',()=>selectServiceCode(s.code,s.name));
     grid.appendChild(card);
   });
