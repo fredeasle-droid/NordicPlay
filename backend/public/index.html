@@ -174,7 +174,26 @@ function renderVerificationServices(query){
   const filtered=q?all.filter(s=>String(s.name||'').toLowerCase().includes(q)):all;
   const limit=q?80:(window.verificationVisible||48);
   const shown=filtered.slice(0,limit);
-  grid.innerHTML=shown.map(s=>'<div class="card service" data-name="'+escapeHtml(s.name)+'" onclick="selectServiceCode(\\''+escapeJs(s.code)+'\\',\\''+escapeJs(s.name)+'\\')"><div class="service-logo"><img loading="lazy" src="'+logoUrl(s.name,s.code)+'" alt="" onerror="this.onerror=null;this.src=fallbackLogo()"></div><h3>'+escapeHtml(s.name)+'</h3><p>SMS-verifikation</p></div>').join('');
+  grid.innerHTML='';
+  shown.forEach(s=>{
+    const card=document.createElement('div');
+    card.className='card service';
+    const logo=document.createElement('div');
+    logo.className='service-logo';
+    const img=document.createElement('img');
+    img.loading='lazy';
+    img.src=logoUrl(s.name,s.code);
+    img.alt='';
+    img.onerror=()=>{img.onerror=null;img.src=fallbackLogo()};
+    logo.appendChild(img);
+    const h=document.createElement('h3');
+    h.textContent=s.name;
+    const p=document.createElement('p');
+    p.textContent='SMS-verifikation';
+    card.append(logo,h,p);
+    card.addEventListener('click',()=>selectServiceCode(s.code,s.name));
+    grid.appendChild(card);
+  });
   if(count)count.textContent=(q?filtered.length:all.length)+' services'+(shown.length<filtered.length?' · viser '+shown.length:'');
   if(more)more.style.display=!q&&shown.length<filtered.length?'block':'none';
 }
