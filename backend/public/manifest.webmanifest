@@ -1,0 +1,10 @@
+{
+  "name":"DANSK eSIM — NO VERIFICATION",
+  "short_name":"DANSK eSIM",
+  "start_url":"/",
+  "display":"standalone",
+  "background_color":"#070707",
+  "theme_color":"#090909",
+  "lang":"da",
+  "icons":[{"src":"/icons/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
