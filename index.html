@@ -7,7 +7,7 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <title>DANSK eSIM — NO VERIFICATION</title>
 <style>
- .service-logo{width:42px;height:42px;border-radius:12px;background:#181818;border:1px solid #2b2b2b;display:flex;align-items:center;justify-content:center;margin-bottom:11px;overflow:hidden}.service-logo img{width:28px;height:28px;object-fit:contain;display:block}.service-meta{display:flex;justify-content:space-between;gap:8px;color:#777;font-size:9px;margin:8px 1px 10px}.service-meta span:first-child{color:#ff7d89;font-weight:800}.service.hidden{display:none}
+ .service-logo{width:42px;height:42px;border-radius:12px;background:#181818;border:1px solid #2b2b2b;display:flex;align-items:center;justify-content:center;margin-bottom:11px;overflow:hidden}.service-logo img{width:28px;height:28px;object-fit:contain;display:block}.service-more{margin-top:10px}.service-meta{display:flex;justify-content:space-between;gap:8px;color:#777;font-size:9px;margin:8px 1px 10px}.service-meta span:first-child{color:#ff7d89;font-weight:800}.service.hidden{display:none}
 :root{--bg:#070707;--panel:#101010;--panel2:#151515;--red:#ff2438;--red2:#ff5262;--muted:#929292;--line:#272727;--text:#f7f7f7;--green:#39d98a}
 *{box-sizing:border-box}html,body{margin:0;background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{min-height:100vh}.app{max-width:460px;margin:auto;min-height:100vh;background:linear-gradient(180deg,#0a0a0a,#050505);padding-bottom:84px}
 header{position:sticky;top:0;z-index:20;background:rgba(8,8,8,.94);backdrop-filter:blur(14px);border-bottom:1px solid #202020;padding:13px 16px;display:flex;align-items:center;justify-content:space-between}.brand{font-weight:950;letter-spacing:.7px;font-size:14px}.brand i{color:var(--red);font-style:normal}.status{font-size:9px;color:#bdbdbd}.dot{display:inline-block;width:6px;height:6px;background:var(--green);border-radius:50%;margin-right:5px}
@@ -65,7 +65,7 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 <label class="formlabel">Transaktions-ID (valgfrit)</label><input placeholder="TXID"><button class="btn" onclick="toast('Betaling markeret som afventer godkendelse');show('orders')">Jeg har betalt →</button><div class="notice">Når betalingen er modtaget, gennemgår vi ordren og leverer eSIM'en.</div></section>
 
 <section id="verification" class="screen"><div class="eyebrow">App Verification</div><div class="title">Hvad skal verificeres?</div><p class="sub">Vælg en understøttet tjeneste. Tilgængelighed afhænger af den valgte provider.</p>
-<label class="formlabel">Søg efter service</label><input id="serviceSearch" placeholder="Fx WhatsApp, Discord, Snapchat..." oninput="filterServices(this.value)"><div class="service-meta"><span id="serviceCount">50+ services</span><span>Tilgængelighed afhænger af provider</span></div><div id="serviceGrid" class="grid">
+<label class="formlabel">Søg efter service</label><input id="serviceSearch" placeholder="Fx WhatsApp, Discord, Snapchat..." oninput="filterServices(this.value)"><div class="service-meta"><span id="serviceCount">Indlæser services…</span><span>Tilgængelighed afhænger af provider</span></div><div id="serviceGrid" class="grid">
 <div class="card service" data-name="WhatsApp" onclick="selectService('WhatsApp')"><div class="icon">🟢</div><h3>WhatsApp</h3><p>SMS-verifikation</p></div>
 <div class="card service" data-name="Telegram" onclick="selectService('Telegram')"><div class="icon">✈️</div><h3>Telegram</h3><p>SMS-verifikation</p></div>
 <div class="card service" data-name="Instagram" onclick="selectService('Instagram')"><div class="icon">📸</div><h3>Instagram</h3><p>SMS-verifikation</p></div>
@@ -115,7 +115,7 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 <div class="card service" data-name="Zoom" onclick="selectService('Zoom')"><div class="icon">Z</div><h3>Zoom</h3><p>SMS-verifikation</p></div>
 <div class="card service" data-name="Skype" onclick="selectService('Skype')"><div class="icon">S</div><h3>Skype</h3><p>SMS-verifikation</p></div>
 <div class="card service" data-name="Discord" onclick="selectService('Discord')"><div class="icon">🎮</div><h3>Discord</h3><p>SMS-verifikation</p></div>
-</div><div class="notice">* “NO KYC” betyder, at vi ikke planlægger at indsamle unødvendige identitetsoplysninger i vores eget flow. Den endelige adgang uden KYC afhænger af den valgte tele-/verification-provider og gældende regler. En målplatform kan også selv kræve identitets- eller telefonverifikation.</div></section>
+</div><button id="serviceMore" class="btn secondary service-more" style="display:none" onclick="loadMoreServices()">Vis flere</button><div class="notice">* “NO KYC” betyder, at vi ikke planlægger at indsamle unødvendige identitetsoplysninger i vores eget flow. Den endelige adgang uden KYC afhænger af den valgte tele-/verification-provider og gældende regler. En målplatform kan også selv kræve identitets- eller telefonverifikation.</div></section>
 
 <section id="verifycountry" class="screen"><button class="back" onclick="show('verification')">← Tilbage</button><div class="eyebrow">App Verification</div><div class="title">Vælg land</div><div class="option selected" onclick="selectOpt(this)"><div><b>🇩🇰 Danmark</b><div class="mini">+45</div></div><i class="check"></i></div><div class="option" onclick="selectOpt(this)"><div><b>🇸🇪 Sverige</b><div class="mini">+46 · kommer senere</div></div><i class="check"></i></div><button class="btn" onclick="show('verifybuy')">Fortsæt →</button></section>
 
@@ -158,12 +158,33 @@ async function loadVerificationServices(){
     if(!res.ok)throw new Error();
     const data=await res.json();
     const services=Array.isArray(data.services)?data.services:[];
-    grid.innerHTML=services.map(s=>'<div class="card service" data-name="'+escapeHtml(s.name)+'" onclick="selectServiceCode(\\''+escapeJs(s.code)+'\\',\\''+escapeJs(s.name)+'\\')"><div class="service-logo"><img loading="lazy" src="'+logoUrl(s.name,s.code)+'" alt="" onerror="this.style.display=\\'none\\'"></div><h3>'+escapeHtml(s.name)+'</h3><p>SMS-verifikation</p></div>').join('');
-    if(count)count.textContent=services.length+' services';
+    window.verificationServices=services;
+    window.verificationVisible=48;
+    renderVerificationServices('');
   }catch(e){
     if(count)count.textContent='Servicekatalog midlertidigt utilgængeligt';
   }
 }
+function renderVerificationServices(query){
+  const grid=document.getElementById('serviceGrid');
+  const count=document.getElementById('serviceCount');
+  const more=document.getElementById('serviceMore');
+  const all=Array.isArray(window.verificationServices)?window.verificationServices:[];
+  const q=String(query||'').trim().toLowerCase();
+  const filtered=q?all.filter(s=>String(s.name||'').toLowerCase().includes(q)):all;
+  const limit=q?80:(window.verificationVisible||48);
+  const shown=filtered.slice(0,limit);
+  grid.innerHTML=shown.map(s=>'<div class="card service" data-name="'+escapeHtml(s.name)+'" onclick="selectServiceCode(\\''+escapeJs(s.code)+'\\',\\''+escapeJs(s.name)+'\\')"><div class="service-logo"><img loading="lazy" src="'+logoUrl(s.name,s.code)+'" alt="" onerror="this.onerror=null;this.src=fallbackLogo()"></div><h3>'+escapeHtml(s.name)+'</h3><p>SMS-verifikation</p></div>').join('');
+  if(count)count.textContent=(q?filtered.length:all.length)+' services'+(shown.length<filtered.length?' · viser '+shown.length:'');
+  if(more)more.style.display=!q&&shown.length<filtered.length?'block':'none';
+}
+function loadMoreServices(){
+  window.verificationVisible=(window.verificationVisible||48)+48;
+  const q=document.getElementById('serviceSearch')?.value||'';
+  renderVerificationServices(q);
+}
+function filterServices(q){renderVerificationServices(q)}
+function fallbackLogo(){return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#ff2438"/><path d="M20 32h24M32 20v24" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>')}
 function logoSlug(name,code){const a={wa:"whatsapp",tg:"telegram",ig:"instagram",fb:"facebook",tt:"tiktok",go:"google",dc:"discord",sn:"snapchat",tw:"x",ms:"microsoft",ap:"apple",am:"amazon",pp:"paypal",st:"steam",sp:"spotify",ub:"uber",bl:"bolt",ab:"airbnb",li:"linkedin",rd:"reddit",tr:"twitch",pi:"pinterest",vb:"viber",wc:"wechat",sg:"signal",ln:"line",kt:"kakaotalk",ya:"yahoo",yd:"yandex",bn:"binance",by:"bybit",cb:"coinbase",ok:"okx",kl:"klarna",rv:"revolut",zl:"zalando",eb:"ebay",al:"aliexpress",bo:"bookingdotcom",in:"indeed",ca:"canva",no:"notion",gh:"github",gl:"gitlab",oa:"openai",cg:"chatgpt",zm:"zoom",sk:"skype"};const n=String(name||"").toLowerCase().trim();return a[String(code||"").toLowerCase()]||n.replace(/&/g,"and").replace(/[^a-z0-9]+/g,"");}function logoUrl(name,code){return "https://cdn.simpleicons.org/"+logoSlug(name,code)+"?viewbox=auto"}
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function escapeJs(v){return String(v).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
