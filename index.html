@@ -7,6 +7,7 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <title>DANSK eSIM — NO VERIFICATION</title>
 <style>
+.service-meta{display:flex;justify-content:space-between;gap:8px;color:#777;font-size:9px;margin:8px 1px 10px}.service-meta span:first-child{color:#ff7d89;font-weight:800}.service.hidden{display:none}
 :root{--bg:#070707;--panel:#101010;--panel2:#151515;--red:#ff2438;--red2:#ff5262;--muted:#929292;--line:#272727;--text:#f7f7f7;--green:#39d98a}
 *{box-sizing:border-box}html,body{margin:0;background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{min-height:100vh}.app{max-width:460px;margin:auto;min-height:100vh;background:linear-gradient(180deg,#0a0a0a,#050505);padding-bottom:84px}
 header{position:sticky;top:0;z-index:20;background:rgba(8,8,8,.94);backdrop-filter:blur(14px);border-bottom:1px solid #202020;padding:13px 16px;display:flex;align-items:center;justify-content:space-between}.brand{font-weight:950;letter-spacing:.7px;font-size:14px}.brand i{color:var(--red);font-style:normal}.status{font-size:9px;color:#bdbdbd}.dot{display:inline-block;width:6px;height:6px;background:var(--green);border-radius:50%;margin-right:5px}
@@ -26,7 +27,7 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 <header><div class="brand"><i>◉</i> DANSK eSIM</div><div class="status"><span class="dot"></span><span id="tgStatus">TELEGRAM</span></div></header>
 <main>
 <section id="home" class="screen active">
-  <div class="hero"><span class="pill">🇩🇰 +45 · TELEGRAM MINI APP</span><div class="title">Dit danske nummer.<br>Direkte i din eSIM.</div><p class="sub">Vælg en løsning, bestil og modtag din eSIM digitalt. Priser og provider kobles på senere.</p><button class="btn" onclick="show('esim')">Køb eSIM →</button></div>
+  <div class="hero"><span class="pill">🇩🇰 +45 · NO KYC* · TELEGRAM MINI APP</span><div class="title">Dit danske nummer.<br>Direkte i din eSIM.</div><p class="sub">Dansk eSIM med fokus på privatliv og dataminimering. Ingen unødvendige identitetsoplysninger i vores eget flow.</p><button class="btn" onclick="show('esim')">Køb eSIM →</button></div>
   <div class="grid">
     <div class="card redline" onclick="show('verification')"><div class="icon">🔐</div><h3>App Verification</h3><p>Engangsverifikation via SMS til understøttede tjenester.</p></div>
     <div class="card" onclick="show('credits')"><div class="icon">💳</div><h3>Credits</h3><p>Gem credits på kontoen og brug dem, når du vil.</p></div>
@@ -64,9 +65,57 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 <label class="formlabel">Transaktions-ID (valgfrit)</label><input placeholder="TXID"><button class="btn" onclick="toast('Betaling markeret som afventer godkendelse');show('orders')">Jeg har betalt →</button><div class="notice">Når betalingen er modtaget, gennemgår vi ordren og leverer eSIM'en.</div></section>
 
 <section id="verification" class="screen"><div class="eyebrow">App Verification</div><div class="title">Hvad skal verificeres?</div><p class="sub">Vælg en understøttet tjeneste. Tilgængelighed afhænger af den valgte provider.</p>
-<div class="grid">
-<div class="card" onclick="toast('WhatsApp valgt');show('verifycountry')"><div class="icon">🟢</div><h3>WhatsApp</h3><p>SMS-verifikation</p></div><div class="card" onclick="toast('Telegram valgt');show('verifycountry')"><div class="icon">✈️</div><h3>Telegram</h3><p>SMS-verifikation</p></div><div class="card" onclick="toast('Instagram valgt');show('verifycountry')"><div class="icon">📸</div><h3>Instagram</h3><p>SMS-verifikation</p></div><div class="card" onclick="toast('TikTok valgt');show('verifycountry')"><div class="icon">🎵</div><h3>TikTok</h3><p>SMS-verifikation</p></div><div class="card" onclick="toast('Facebook valgt');show('verifycountry')"><div class="icon">🔵</div><h3>Facebook</h3><p>SMS-verifikation</p></div><div class="card" onclick="toast('Google valgt');show('verifycountry')"><div class="icon">G</div><h3>Google</h3><p>SMS-verifikation</p></div>
-</div></section>
+<label class="formlabel">Søg efter service</label><input id="serviceSearch" placeholder="Fx WhatsApp, Discord, Snapchat..." oninput="filterServices(this.value)"><div class="service-meta"><span id="serviceCount">50+ services</span><span>Tilgængelighed afhænger af provider</span></div><div id="serviceGrid" class="grid">
+<div class="card service" data-name="WhatsApp" onclick="selectService('WhatsApp')"><div class="icon">🟢</div><h3>WhatsApp</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Telegram" onclick="selectService('Telegram')"><div class="icon">✈️</div><h3>Telegram</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Instagram" onclick="selectService('Instagram')"><div class="icon">📸</div><h3>Instagram</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="TikTok" onclick="selectService('TikTok')"><div class="icon">🎵</div><h3>TikTok</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Facebook" onclick="selectService('Facebook')"><div class="icon">🔵</div><h3>Facebook</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Google" onclick="selectService('Google')"><div class="icon">G</div><h3>Google</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Discord" onclick="selectService('Discord')"><div class="icon">🎮</div><h3>Discord</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Snapchat" onclick="selectService('Snapchat')"><div class="icon">👻</div><h3>Snapchat</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="X Twitter" onclick="selectService('X')"><div class="icon">𝕏</div><h3>X</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Microsoft Outlook" onclick="selectService('Microsoft')"><div class="icon">▦</div><h3>Microsoft</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Apple iCloud" onclick="selectService('Apple')"><div class="icon"></div><h3>Apple</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Amazon" onclick="selectService('Amazon')"><div class="icon">🛒</div><h3>Amazon</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="PayPal" onclick="selectService('PayPal')"><div class="icon">💳</div><h3>PayPal</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Steam" onclick="selectService('Steam')"><div class="icon">🎮</div><h3>Steam</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Spotify" onclick="selectService('Spotify')"><div class="icon">🎧</div><h3>Spotify</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Uber" onclick="selectService('Uber')"><div class="icon">🚕</div><h3>Uber</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Bolt" onclick="selectService('Bolt')"><div class="icon">⚡</div><h3>Bolt</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Airbnb" onclick="selectService('Airbnb')"><div class="icon">🏠</div><h3>Airbnb</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="LinkedIn" onclick="selectService('LinkedIn')"><div class="icon">in</div><h3>LinkedIn</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Reddit" onclick="selectService('Reddit')"><div class="icon">👽</div><h3>Reddit</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Twitch" onclick="selectService('Twitch')"><div class="icon">◈</div><h3>Twitch</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Pinterest" onclick="selectService('Pinterest')"><div class="icon">📌</div><h3>Pinterest</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Viber" onclick="selectService('Viber')"><div class="icon">📞</div><h3>Viber</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="WeChat" onclick="selectService('WeChat')"><div class="icon">💬</div><h3>WeChat</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Signal" onclick="selectService('Signal')"><div class="icon">🔵</div><h3>Signal</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="LINE" onclick="selectService('LINE')"><div class="icon">💚</div><h3>LINE</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="KakaoTalk" onclick="selectService('KakaoTalk')"><div class="icon">💛</div><h3>KakaoTalk</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Yahoo" onclick="selectService('Yahoo')"><div class="icon">Y!</div><h3>Yahoo</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Yandex" onclick="selectService('Yandex')"><div class="icon">Я</div><h3>Yandex</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Binance" onclick="selectService('Binance')"><div class="icon">₿</div><h3>Binance</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Bybit" onclick="selectService('Bybit')"><div class="icon">₿</div><h3>Bybit</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Coinbase" onclick="selectService('Coinbase')"><div class="icon">◉</div><h3>Coinbase</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="OKX" onclick="selectService('OKX')"><div class="icon">◌</div><h3>OKX</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Klarna" onclick="selectService('Klarna')"><div class="icon">K</div><h3>Klarna</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Revolut" onclick="selectService('Revolut')"><div class="icon">R</div><h3>Revolut</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Zalando" onclick="selectService('Zalando')"><div class="icon">Z</div><h3>Zalando</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="eBay" onclick="selectService('eBay')"><div class="icon">🛍️</div><h3>eBay</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="AliExpress" onclick="selectService('AliExpress')"><div class="icon">🛒</div><h3>AliExpress</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Booking.com" onclick="selectService('Booking.com')"><div class="icon">B</div><h3>Booking.com</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Indeed" onclick="selectService('Indeed')"><div class="icon">i</div><h3>Indeed</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Canva" onclick="selectService('Canva')"><div class="icon">C</div><h3>Canva</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Notion" onclick="selectService('Notion')"><div class="icon">N</div><h3>Notion</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="GitHub" onclick="selectService('GitHub')"><div class="icon">◒</div><h3>GitHub</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="GitLab" onclick="selectService('GitLab')"><div class="icon">◢</div><h3>GitLab</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="OpenAI" onclick="selectService('OpenAI')"><div class="icon">◎</div><h3>OpenAI</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="ChatGPT" onclick="selectService('ChatGPT')"><div class="icon">◎</div><h3>ChatGPT</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Zoom" onclick="selectService('Zoom')"><div class="icon">Z</div><h3>Zoom</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Skype" onclick="selectService('Skype')"><div class="icon">S</div><h3>Skype</h3><p>SMS-verifikation</p></div>
+<div class="card service" data-name="Discord" onclick="selectService('Discord')"><div class="icon">🎮</div><h3>Discord</h3><p>SMS-verifikation</p></div>
+</div><div class="notice">* “NO KYC” betyder, at vi ikke planlægger at indsamle unødvendige identitetsoplysninger i vores eget flow. Den endelige adgang uden KYC afhænger af den valgte tele-/verification-provider og gældende regler. En målplatform kan også selv kræve identitets- eller telefonverifikation.</div></section>
 
 <section id="verifycountry" class="screen"><button class="back" onclick="show('verification')">← Tilbage</button><div class="eyebrow">App Verification</div><div class="title">Vælg land</div><div class="option selected" onclick="selectOpt(this)"><div><b>🇩🇰 Danmark</b><div class="mini">+45</div></div><i class="check"></i></div><div class="option" onclick="selectOpt(this)"><div><b>🇸🇪 Sverige</b><div class="mini">+46 · kommer senere</div></div><i class="check"></i></div><button class="btn" onclick="show('verifybuy')">Fortsæt →</button></section>
 
@@ -80,7 +129,7 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 
 <section id="orders" class="screen"><div class="eyebrow">Mine ordrer</div><div class="title">Ordrehistorik</div><div class="list"><div class="listitem"><span class="tag">Afventer</span><b>DES-2026-0001</b><small>Dansk eSIM · 500 kr. · Oprettet i dag</small></div><div class="empty">Dine kommende ordrer vises her.</div></div></section>
 
-<section id="profile" class="screen"><div class="eyebrow">Profil</div><div class="title">Min konto</div><div class="summary"><div class="sumrow"><span>Status</span><b>Aktiv</b></div><div class="sumrow"><span>Telegram</span><b>Forbundet</b></div><div class="sumrow"><span>Credits</span><b>0</b></div></div><div class="section"><button class="btn secondary" onclick="toast('Indstillinger kommer her')">Indstillinger</button><button class="btn ghost" onclick="toast('Support åbnes')">💬 Support</button></div><div class="notice">Platformen er bygget med fokus på dataminimering. Provider- og betalingspartnere kan have egne lovpligtige datakrav.</div></section>
+<section id="profile" class="screen"><div class="eyebrow">Profil</div><div class="title">Min konto</div><div class="summary"><div class="sumrow"><span>Status</span><b>Aktiv</b></div><div class="sumrow"><span>Telegram</span><b>Forbundet</b></div><div class="sumrow"><span>Credits</span><b>0</b></div></div><div class="section"><button class="btn secondary" onclick="toast('Indstillinger kommer her')">Indstillinger</button><button class="btn ghost" onclick="toast('Support åbnes')">💬 Support</button></div><div class="notice"><b>NO KYC* · PRIVACY FIRST</b><br>Vi bygger platformen med dataminimering som udgangspunkt og indsamler ikke unødvendige identitetsoplysninger i vores eget flow. Provider- og betalingspartnere kan have egne lovpligtige datakrav.</div></section>
 </main>
 <nav class="nav"><button data-screen="home" class="active" onclick="show('home')"><span>⌂</span>Start</button><button data-screen="esim" onclick="show('esim')"><span>▣</span>eSIM</button><button data-screen="verification" onclick="show('verification')"><span>⌁</span>Verifikation</button><button data-screen="profile" onclick="show('profile')"><span>◉</span>Profil</button></nav>
 <div class="toast" id="toast"></div>
@@ -90,6 +139,8 @@ const tg=window.Telegram?.WebApp;
 if(tg){tg.ready();tg.expand();tg.setHeaderColor("#080808");tg.setBackgroundColor("#050505");}
 function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));window.scrollTo({top:0,behavior:'smooth'})}
 function selectOpt(el){const p=el.parentElement;p.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));el.classList.add('selected')}
+function selectService(name){toast(name+' valgt');show('verifycountry')}
+function filterServices(q){const s=String(q||'').trim().toLowerCase();let visible=0;document.querySelectorAll('#serviceGrid .service').forEach(el=>{const ok=!s||el.dataset.name.toLowerCase().includes(s);el.classList.toggle('hidden',!ok);if(ok)visible++});const count=document.getElementById('serviceCount');if(count)count.textContent=visible+' services'}
 async function connectTelegram(){
   if(!tg){toast('Åbn DANSK eSIM fra Telegram');return;}
   try{
