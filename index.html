@@ -69,9 +69,9 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 <button class="btn" onclick="show('delivery')">Fortsæt →</button></section>
 
 <section id="delivery" class="screen"><button class="back" onclick="show('esim')">← Tilbage</button><div class="eyebrow">Levering</div><div class="title">Hvordan skal ordren leveres?</div>
-<div class="option selected" onclick="selectOpt(this)"><div><b>⚡ Express</b><div class="mini">Prioriteret behandling · ekstra gebyr kommer senere</div></div><i class="check"></i></div>
-<div class="option" onclick="selectOpt(this)"><div><b>📦 Standard</b><div class="mini">Normal behandling</div></div><i class="check"></i></div>
-<div class="section"><h2>Leveringskanal</h2><div class="option selected" onclick="selectOpt(this)"><div><b>✈️ Telegram</b><div class="mini">Leveres direkte i chatten</div></div><i class="check"></i></div><div class="option" onclick="selectOpt(this)"><div><b>✉️ E-mail</b><div class="mini">Sendes til din angivne e-mail</div></div><i class="check"></i></div></div>
+<div class="option selected" onclick="selectDelivery(this,'Express')"><div><b>⚡ Express</b><div class="mini">Prioriteret behandling · ekstra gebyr kommer senere</div></div><i class="check"></i></div>
+<div class="option" onclick="selectDelivery(this,'Standard')"><div><b>📦 Standard</b><div class="mini">Normal behandling</div></div><i class="check"></i></div>
+<div class="section"><h2>Leveringskanal</h2><div class="option selected" onclick="selectChannel(this,'Telegram')"><div><b>✈️ Telegram</b><div class="mini">Leveres direkte i chatten</div></div><i class="check"></i></div><div class="option" onclick="selectChannel(this,'E-mail')"><div><b>✉️ E-mail</b><div class="mini">Sendes til din angivne e-mail</div></div><i class="check"></i></div></div>
 <button class="btn" onclick="show('order')">Se ordre →</button></section>
 
 <section id="order" class="screen"><button class="back" onclick="show('delivery')">← Tilbage</button><div class="eyebrow">Ordre</div><div class="title">Tjek din bestilling</div>
@@ -156,6 +156,7 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 <div class="credit-card" data-credits="100" onclick="selectCreditPackage(100)"><div class="credit-top"><div class="credit-icon">◆</div><i class="credit-check"></i></div><h3>100 credits</h3><p>Største pakke</p><div class="credit-price">Pris kommer senere</div></div>
 </div><button class="btn credit-cta" onclick="startCreditPayment()">Fortsæt til betaling →</button><div class="notice">Priserne er endnu ikke fastlagt. Derfor viser demoen selve valg- og betalingsflowet uden at opfinde en salgspris.</div></div></section>
 
+<section id="creditPayment" class="screen"><button class="back" onclick="show('credits')">← Tilbage</button><div class="eyebrow">Credits</div><div class="title">Betaling</div><div class="payment-product"><div class="payment-label">Credit-køb</div><b id="creditPaymentProduct">—</b><small id="creditPaymentMeta">—</small></div><div class="summary"><div class="sumrow"><span>Credits</span><b id="creditPaymentCredits">—</b></div><div class="sumrow"><span>Beløb</span><b class="total" id="creditPaymentAmount">Pris kommer senere</b></div></div><div class="option selected"><div><b>₿ Crypto</b><div class="mini">Betalingsoplysninger vises, når betalingsudbyderen er tilsluttet.</div></div><i class="check"></i></div><button class="btn" onclick="toast('Betalingsudbyderen er endnu ikke tilsluttet')">Fortsæt til betaling →</button><button class="btn secondary" onclick="show('credits')">Vælg en anden pakke</button><div class="notice">Vi viser ikke en opdigtet pris eller betalingsadresse. Selve betalingsintegration mangler stadig.</div></section>
 <section id="orders" class="screen"><div class="eyebrow">Mine ordrer</div><div class="title">Ordrehistorik</div><div class="list"><div class="listitem"><span class="tag">Afventer</span><b>DES-2026-0001</b><small>Dansk eSIM · 500 kr. · Oprettet i dag</small></div><div class="empty">Dine kommende ordrer vises her.</div></div></section>
 
 
@@ -245,7 +246,12 @@ function savePushPreference(enabled){
   window.pushEnabled=!!enabled;
   try{localStorage.setItem('pushEnabled',enabled?'1':'0')}catch{}
 }
-function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));if(id==='order')updateOrderPreview();if(id==='payment')refreshPayment();if(id==='credits')loadCreditsBalance();window.scrollTo({top:0,behavior:'smooth'})}
+let selectedDelivery='Express',selectedChannel='Telegram',selectedCreditPackage=3;
+function setScreenUrl(id,replace){try{const u=new URL(location.href);u.searchParams.set('screen',id);history[replace?'replaceState':'pushState']({screen:id},'',u)}catch{}}
+function show(id,opts={}){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const el=document.getElementById(id);if(!el)return;el.classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));if(id==='order')updateOrderPreview();if(id==='payment')refreshPayment();if(id==='proof')refreshProof();if(id==='credits')loadCreditsBalance();if(id==='creditPayment')refreshCreditPayment();if(!opts.fromHistory)setScreenUrl(id,!!opts.replace);window.scrollTo({top:0,behavior:'smooth'})}
+window.addEventListener('popstate',()=>show(new URL(location.href).searchParams.get('screen')||'home',{fromHistory:true}));
+function selectDelivery(el,value){el.parentElement.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');selectedDelivery=value;updateOrderPreview()}
+function selectChannel(el,value){el.parentElement.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');selectedChannel=value;updateOrderPreview()}
 window.selectedEsim={productId:'sms_1',label:'Dansk eSIM · Med SMS',price:500};
 function selectOpt(el){
  const p=el.parentElement;p.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');
@@ -258,8 +264,18 @@ function selectOpt(el){
 function updateOrderPreview(){
  const p=window.selectedEsim;
  const rows=document.querySelectorAll('#order .sumrow');
- if(rows.length>=5){rows[0].querySelector('b').textContent=p.label;rows[1].querySelector('b').textContent=p.price?new Intl.NumberFormat('da-DK').format(p.price)+' kr./md.':'Pris senere';rows[4].querySelector('b').textContent=p.price?new Intl.NumberFormat('da-DK').format(p.price)+' kr.':'Pris senere'}
+ if(rows.length>=5){rows[0].querySelector('b').textContent=p.label;rows[1].querySelector('b').textContent=p.price?new Intl.NumberFormat('da-DK').format(p.price)+' kr./md.':'Pris senere';rows[2].querySelector('b').textContent=selectedDelivery;rows[3].querySelector('b').textContent=selectedChannel;rows[4].querySelector('b').textContent=p.price?new Intl.NumberFormat('da-DK').format(p.price)+' kr.':'Pris senere'}
 }
+async function loadAccountData(){if(!tg)return;try{const r=await fetch('/api/me',{headers:{authorization:'tma '+tg.initData}});if(!r.ok)return;const d=await r.json();const credits=d.user?.credits??0;const p=document.getElementById('profileCredits');if(p)p.textContent=credits;}catch{}}
+async function loadCreditsBalance(){const e=document.getElementById('creditsBalance');if(!e)return;if(!tg){e.textContent='0';return}try{const r=await fetch('/api/credits/history',{headers:{authorization:'tma '+tg.initData}});if(!r.ok)return;const d=await r.json();e.textContent=d.balance??0;const p=document.getElementById('profileCredits');if(p)p.textContent=d.balance??0}catch{}}
+async function loadPrivacy(){}
+async function loadStatus(){const b=document.getElementById('statusList');if(!b)return;try{const r=await fetch('/api/service-status');const d=await r.json();b.innerHTML=Object.entries(d.components||{}).map(([k,v])=>'<div class="listitem"><b>🟢 '+k+'</b><small>'+v+'</small></div>').join('')}catch{b.innerHTML='<div class="listitem"><b>🟡 Status</b><small>Kunne ikke hente live status.</small></div>'}}
+async function copyReferral(){if(!tg){toast('Åbn Mini Appen fra Telegram');return}try{const r=await fetch('/api/referral',{headers:{authorization:'tma '+tg.initData}});const d=await r.json();if(!r.ok||!d.link){toast('Henvisningslink er ikke klar endnu');return}await navigator.clipboard.writeText(d.link);toast('Henvisningslink kopieret')}catch{toast('Kunne ikke hente henvisningslink')}}
+function selectCreditPackage(n){selectedCreditPackage=n;document.querySelectorAll('.credit-card').forEach(x=>x.classList.toggle('selected',Number(x.dataset.credits)===n))}
+function refreshCreditPayment(){const a=document.getElementById('creditPaymentProduct');const b=document.getElementById('creditPaymentCredits');if(a)a.textContent=selectedCreditPackage+' credits';if(b)b.textContent=selectedCreditPackage}
+function startCreditPayment(){refreshCreditPayment();show('creditPayment')}
+function refreshProof(){const o=window.currentOrder;if(!o)return;[['proofProduct',o.productId||'eSIM'],['proofProductMeta','Ordre · '+o.id],['proofAmount',new Intl.NumberFormat('da-DK').format(o.amountDkk)+' kr.'],['proofOrderId',o.id]].forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v})}
+function paymentBack(){show(window.currentOrder?'order':'esim')}
 async function createOrder(){
  if(!tg){toast('Åbn Mini Appen fra Telegram');return}
  const p=window.selectedEsim;if(!p.price){toast('Dette produkt kan først bestilles, når minutpriserne er klar');return}
@@ -272,7 +288,7 @@ async function createOrder(){
   show('payment');
  }catch{toast('Backend er ikke tilgængelig')}
 }
-function selectService(name){toast(name+' valgt');show('verifycountry')}
+function selectService(name){const n=String(name||'').trim();const s=(window.verificationServices||[]).find(x=>String(x.name||'').toLowerCase()===n.toLowerCase());selectServiceCode(s?.code||n,s?.name||n)}
 function filterServices(q){const s=String(q||'').trim().toLowerCase();let visible=0;document.querySelectorAll('#serviceGrid .service').forEach(el=>{const ok=!s||el.dataset.name.toLowerCase().includes(s);el.classList.toggle('hidden',!ok);if(ok)visible++});const count=document.getElementById('serviceCount');if(count)count.textContent=visible+' services'}
 async function refreshPayment(){const o=window.currentOrder;if(o){document.getElementById('paymentOrderId').textContent=o.id;document.getElementById('paymentAmount').textContent=new Intl.NumberFormat('da-DK').format(o.amountDkk)+' kr.'}}
 
@@ -366,10 +382,9 @@ function loadMoreServices(){
   renderVerificationServices(q);
 }
 function filterServices(q){renderVerificationServices(q)}
-function fallbackLogo(){return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#ff2438"/><path d="M20 32h24M32 20v24" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>')}
-function logoSlug(name,code){const a={wa:"whatsapp",tg:"telegram",ig:"instagram",fb:"facebook",tt:"tiktok",go:"google",dc:"discord",sn:"snapchat",tw:"x",ms:"microsoft",ap:"apple",am:"amazon",pp:"paypal",st:"steam",sp:"spotify",ub:"uber",bl:"bolt",ab:"airbnb",li:"linkedin",rd:"reddit",tr:"twitch",pi:"pinterest",vb:"viber",wc:"wechat",sg:"signal",ln:"line",kt:"kakaotalk",ya:"yahoo",yd:"yandex",bn:"binance",by:"bybit",cb:"coinbase",ok:"okx",kl:"klarna",rv:"revolut",zl:"zalando",eb:"ebay",al:"aliexpress",bo:"bookingdotcom",in:"indeed",ca:"canva",no:"notion",gh:"github",gl:"gitlab",oa:"openai",cg:"chatgpt",zm:"zoom",sk:"skype"};const n=String(name||"").toLowerCase().trim();return a[String(code||"").toLowerCase()]||n.replace(/&/g,"and").replace(/[^a-z0-9]+/g,"");}
-function domainLogoUrl(name,code){return "https://www.google.com/s2/favicons?domain="+encodeURIComponent(logoDomain(name,code))+"&sz=128"}
-function fallbackLogo(name){const initial=String(name||"?").trim().slice(0,1).toUpperCase();return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#ff2438"/><text x="32" y="42" text-anchor="middle" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="#fff">'+initial+'</text></svg>')}
+function logoDomain(name,code){const a={whatsapp:'whatsapp.com',telegram:'telegram.org',instagram:'instagram.com',facebook:'facebook.com',tiktok:'tiktok.com',google:'google.com',discord:'discord.com',snapchat:'snapchat.com',x:'x.com',twitter:'x.com',microsoft:'microsoft.com',apple:'apple.com',amazon:'amazon.com',paypal:'paypal.com',steam:'steampowered.com',spotify:'spotify.com',uber:'uber.com',bolt:'bolt.eu',airbnb:'airbnb.com',linkedin:'linkedin.com',reddit:'reddit.com',twitch:'twitch.tv',pinterest:'pinterest.com',viber:'viber.com',wechat:'wechat.com',signal:'signal.org',line:'line.me',kakaotalk:'kakao.com',yahoo:'yahoo.com',yandex:'yandex.com',binance:'binance.com',bybit:'bybit.com',coinbase:'coinbase.com',okx:'okx.com',klarna:'klarna.com',revolut:'revolut.com',zalando:'zalando.com',ebay:'ebay.com',aliexpress:'aliexpress.com',bookingcom:'booking.com',indeed:'indeed.com',canva:'canva.com',notion:'notion.so',github:'github.com',gitlab:'gitlab.com',openai:'openai.com',chatgpt:'chatgpt.com',zoom:'zoom.us',skype:'skype.com'};const n=String(name||'').toLowerCase().trim().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'');return a[n]||n+'.com'}
+function domainLogoUrl(name,code){return 'https://www.google.com/s2/favicons?domain='+encodeURIComponent(logoDomain(name,code))+'&sz=128'}
+function fallbackLogo(name){const initial=String(name||'?').trim().slice(0,1).toUpperCase();return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#ff2438"/><text x="32" y="42" text-anchor="middle" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="#fff">'+initial+'</text></svg>')}
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function escapeJs(v){return String(v).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 function selectServiceCode(code,name){window.selectedVerificationService={code,name};document.getElementById('selectedVerifyName').textContent=name;document.getElementById('selectedVerifyMeta').textContent='Service valgt · vælg land';document.getElementById('selectedVerifyBuyName').textContent=name;document.getElementById('selectedVerifyBuyMeta').textContent='Service · '+code;toast(name+' valgt');show('verifycountry')}
@@ -383,6 +398,8 @@ function installApp(){
 function closeInstallGuide(){document.getElementById('installGuideModal')?.classList.remove('open')}
 function dismissInstall(){document.getElementById('installBanner')?.classList.remove('show');localStorage.setItem('installDismissed','1')}
 if(localStorage.getItem('installDismissed')!=='1'){document.getElementById('installBanner')?.classList.add('show')}
+const initialScreen=new URL(location.href).searchParams.get('screen');
+if(initialScreen&&document.getElementById(initialScreen))show(initialScreen,{replace:true});
 loadVerificationServices();
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>t.style.display='none',2200)}
 </script>
