@@ -63,7 +63,17 @@ async function getNumberOtpServices(){
   const r=await fetch("https://api.numberotp.com/v1/public/services",{headers:{accept:"application/json"}});
   if(!r.ok)throw new Error("NumberOTP services request failed: "+r.status);
   const j=await r.json() as any;
-  const services=Array.isArray(j?.data?.services)?j.data.services.map((x:any)=>({code:String(x.code),name:String(x.name),count:Number.isFinite(Number(x.count))?Number(x.count):undefined})).filter((x:any)=>x.code&&x.name):[];
+  const candidates=[
+    j?.data?.services,j?.services,j?.data?.items,j?.data?.results,
+    j?.items,j?.results,Array.isArray(j?.data)?j.data:null
+  ];
+  const raw=candidates.find((x:any)=>Array.isArray(x))??[];
+  const services=raw.map((x:any)=>({
+    code:String(x?.code??x?.id??x?.service??"").trim(),
+    name:String(x?.name??x?.title??x?.service_name??"").trim(),
+    count:Number.isFinite(Number(x?.count))?Number(x.count):undefined
+  })).filter((x:any)=>x.code&&x.name);
+  if(!services.length)throw new Error("NumberOTP services response contained no services");
   verificationCache={at:Date.now(),services}; return services;
 }
 app.get("/api/catalog",async()=>catalog);
