@@ -149,7 +149,26 @@ async function connectTelegram(){
     else{toast('Telegram-login afventer backend');}
   }catch(e){toast('Backend er ikke tilsluttet endnu');}
 }
+async function loadVerificationServices(){
+  const grid=document.getElementById('serviceGrid');
+  const count=document.getElementById('serviceCount');
+  if(!grid)return;
+  try{
+    const res=await fetch('/api/verification/services');
+    if(!res.ok)throw new Error();
+    const data=await res.json();
+    const services=Array.isArray(data.services)?data.services:[];
+    grid.innerHTML=services.map(s=>'<div class="card service" data-name="'+escapeHtml(s.name)+'" onclick="selectServiceCode(\''+escapeJs(s.code)+'\',\''+escapeJs(s.name)+'\')"><div class="icon">◆</div><h3>'+escapeHtml(s.name)+'</h3><p>SMS-verifikation</p></div>').join('');
+    if(count)count.textContent=services.length+' services';
+  }catch(e){
+    if(count)count.textContent='Servicekatalog midlertidigt utilgængeligt';
+  }
+}
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function escapeJs(v){return String(v).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
+function selectServiceCode(code,name){window.selectedVerificationService={code,name};toast(name+' valgt');show('verifycountry')}
 if(tg){connectTelegram();}
+loadVerificationServices();
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>t.style.display='none',2200)}
 </script>
 </body>
