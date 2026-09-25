@@ -190,6 +190,61 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 <script>
 const tg=window.Telegram?.WebApp;
 if(tg){tg.ready();tg.expand();tg.setHeaderColor("#080808");tg.setBackgroundColor("#050505");}
+function closeWelcome(){
+  const el=document.getElementById('welcomeBubble');
+  if(el)el.style.display='none';
+}
+function openChat(){
+  show('support');
+  const panel=document.getElementById('chatPanel');
+  if(!panel)return;
+  panel.classList.add('open');
+  panel.setAttribute('aria-hidden','false');
+  const input=document.getElementById('chatInput');
+  if(input){
+    setTimeout(()=>{try{input.focus({preventScroll:true})}catch{input.focus()}},120);
+  }
+  setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'start'}),50);
+}
+function closeChat(){
+  const panel=document.getElementById('chatPanel');
+  if(!panel)return;
+  panel.classList.remove('open');
+  panel.setAttribute('aria-hidden','true');
+  const input=document.getElementById('chatInput');
+  if(input)input.blur();
+}
+function appendChatMessage(textValue,role){
+  const body=document.getElementById('chatBody');
+  if(!body)return;
+  const bubble=document.createElement('div');
+  bubble.className='bubble '+(role==='user'?'user':'ai');
+  bubble.textContent=textValue;
+  body.appendChild(bubble);
+  body.scrollTop=body.scrollHeight;
+}
+function chatQuick(message){
+  appendChatMessage(message,'user');
+  const reply=/ordrestatus/i.test(message)
+    ? 'Jeg kan hjælpe med ordrestatus. Åbn “Ordrer” i din profil, eller send dit ordre-ID her.'
+    : /agent/i.test(message)
+      ? 'Selvfølgelig. Skriv kort, hvad du skal have hjælp til, så kan en medarbejder overtage.'
+      : 'Jeg kan forklare, hvordan tjenesten fungerer. Bemærk, at eventuelle krav fra udbydere eller tjenester stadig kan gælde.';
+  setTimeout(()=>appendChatMessage(reply,'ai'),220);
+}
+function sendChat(){
+  const input=document.getElementById('chatInput');
+  if(!input)return;
+  const message=input.value.trim();
+  if(!message)return;
+  appendChatMessage(message,'user');
+  input.value='';
+  setTimeout(()=>appendChatMessage('Tak for din besked. Jeg har modtaget den. Hvis du har brug for en medarbejder, skriv “agent”.','ai'),220);
+}
+function savePushPreference(enabled){
+  window.pushEnabled=!!enabled;
+  try{localStorage.setItem('pushEnabled',enabled?'1':'0')}catch{}
+}
 function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));if(id==='order')updateOrderPreview();if(id==='payment')refreshPayment();if(id==='credits')loadCreditsBalance();window.scrollTo({top:0,behavior:'smooth'})}
 window.selectedEsim={productId:'sms_1',label:'Dansk eSIM · Med SMS',price:500};
 function selectOpt(el){
