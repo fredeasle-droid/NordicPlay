@@ -139,7 +139,19 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 
 <section id="support" class="screen"><div class="eyebrow">Support</div><div class="title">Vi er her for at hjælpe</div><p class="sub">Start med AI-assistenten. Hvis dit spørgsmål kræver en medarbejder, kan du bede om en agent.</p><button class="btn" onclick="openChat()">💬 Åbn supportchat</button><div class="section"><h2>Notifikationer</h2><div class="push-toggle"><div><b>Telegram-notifikationer</b><div class="mini">Tilbud, ordrestatus og påmindelser om fornyelse.</div></div><input id="pushEnabled" type="checkbox" onchange="savePushPreference(this.checked)"></div></div><div class="section"><h2>Hjælp</h2><div class="list"><div class="listitem"><b>📱 Mit nummer</b><small>Aktiv status, minutter og fornyelse.</small></div><div class="listitem"><b>💳 Credits</b><small>Saldo, køb og historik.</small></div><div class="listitem"><b>🔐 Verifikation</b><small>Vælg service, land og antal.</small></div></div></div></section>
 
-<section id="profile" class="screen"><div class="eyebrow">Profil</div><div class="title">Min konto</div><div class="summary"><div class="sumrow"><span>Status</span><b>Aktiv</b></div><div class="sumrow"><span>Telegram</span><b>Forbundet</b></div><div class="sumrow"><span>Credits</span><b>0</b></div></div><div class="section"><button class="btn secondary" onclick="toast('Indstillinger kommer her')">Indstillinger</button><button class="btn ghost" onclick="toast('Support åbnes')">💬 Support</button></div><div class="notice"><b>NO KYC* · PRIVACY FIRST</b><br>Vi bygger platformen med dataminimering som udgangspunkt og indsamler ikke unødvendige identitetsoplysninger i vores eget flow. Provider- og betalingspartnere kan have egne lovpligtige datakrav.</div></section>
+<section id="profile" class="screen"><div class="eyebrow">Profil</div><div class="title">Min konto</div><div class="summary"><div class="sumrow"><span>Status</span><b>Aktiv</b></div><div class="sumrow"><span>Telegram</span><b>Forbundet</b></div><div class="sumrow"><span>Credits</span><b id="profileCredits">0</b></div></div>
+<div class="section"><h2>Hurtige funktioner</h2><div class="grid">
+<div class="card" onclick="loadAccountData();show('orders')"><div class="icon">📦</div><h3>Mine ordrer</h3><p>Status, historik og køb igen.</p></div>
+<div class="card" onclick="show('privacy')"><div class="icon">🔒</div><h3>Privatliv</h3><p>Se hvilke data vi bruger og hvorfor.</p></div>
+<div class="card" onclick="show('status')"><div class="icon">🟢</div><h3>Driftsstatus</h3><p>Platform og provider-status.</p></div>
+<div class="card" onclick="show('credits')"><div class="icon">💳</div><h3>Credit-historik</h3><p>Saldo og bevægelser.</p></div>
+</div></div>
+<div class="section"><h2>Henvis en ven</h2><div class="card feature"><h3>Få bonus ved henvisning</h3><p>Dit personlige henvisningslink bliver aktiveret, når referral-systemet er koblet til betalingsflowet.</p><button class="btn secondary" onclick="copyReferral()">Kopiér henvisningslink</button></div></div>
+<div class="section"><button class="btn secondary" onclick="openChat()">💬 Support</button></div>
+<div class="notice"><b>NO VERIFICATION · PRIVACY FIRST</b><br>Vi bygger platformen med dataminimering som udgangspunkt. Telegram, providers, betalingspartnere og lovkrav kan stadig medføre behandling eller opbevaring af bestemte oplysninger.</div></section>
+
+<section id="privacy" class="screen"><button class="back" onclick="show('profile')">← Tilbage</button><div class="eyebrow">Privatliv</div><div class="title">Privatlivscenter</div><div id="privacyContent" class="list"><div class="listitem"><b>🔒 Dataminimering</b><small>Vi forsøger at undgå unødvendige identitetsoplysninger i vores eget flow.</small></div><div class="listitem"><b>🗑 Aktiv kundedata</b><small>Du kan anmode om deaktivering og sletning af aktiv platformdata. Provider-, betalings- og lovpligtige data kan være underlagt andre regler.</small></div><div class="listitem"><b>📱 Telegram</b><small>Mini App'en modtager de Telegram-oplysninger, som Telegram leverer til Mini App'en.</small></div></div></section>
+<section id="status" class="screen"><button class="back" onclick="show('profile')">← Tilbage</button><div class="eyebrow">Status</div><div class="title">Driftsstatus</div><div id="statusList" class="list"><div class="listitem"><b>🟢 Platform</b><small>Indlæser…</small></div></div></section>
 </main>
 
 <div id="welcomeBubble" class="welcome-bubble"><b>👋 Hej og velkommen!</b><p>Jeg er DANSK eSIMs assistent. Har du spørgsmål, hjælper jeg dig gerne.</p><button class="btn" onclick="openChat()">Start chat</button></div>
@@ -240,7 +252,7 @@ function fallbackLogo(name){const initial=String(name||"?").trim().slice(0,1).to
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function escapeJs(v){return String(v).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 function selectServiceCode(code,name){window.selectedVerificationService={code,name};document.getElementById('selectedVerifyName').textContent=name;document.getElementById('selectedVerifyMeta').textContent='Service valgt · vælg land';document.getElementById('selectedVerifyBuyName').textContent=name;document.getElementById('selectedVerifyBuyMeta').textContent='Service · '+code;toast(name+' valgt');show('verifycountry')}
-if(tg){connectTelegram();}
+if(tg){connectTelegram();loadAccountData();loadPrivacy();loadStatus();}
 let deferredInstallPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;document.getElementById('installBanner')?.classList.add('show')});
 function installApp(){if(deferredInstallPrompt){deferredInstallPrompt.prompt();deferredInstallPrompt.userChoice.finally(()=>{deferredInstallPrompt=null})}else{toast('På iPhone: Del → Føj til hjemmeskærm')} }
@@ -252,6 +264,13 @@ function closeChat(){document.getElementById('chatPanel')?.classList.remove('ope
 function addChat(text,type='ai'){const b=document.createElement('div');b.className='bubble '+type;b.textContent=text;document.getElementById('chatBody').appendChild(b);document.getElementById('chatBody').scrollTop=99999}
 function chatQuick(q){document.getElementById('chatInput').value=q;sendChat()}
 function sendChat(){const input=document.getElementById('chatInput');const q=input.value.trim();if(!q)return;addChat(q,'user');input.value='';setTimeout(()=>{let a='Jeg kan hjælpe med eSIM, verifikation, credits, ordrestatus og betaling. Hvis du har brug for en medarbejder, skriv “agent”.';if(/agent|medarbejder/i.test(q))a='Selvfølgelig. Jeg sender dig videre til en supportagent. Din samtale kan fortsættes her.';else if(/verification|verifikation|no verification|kyc/i.test(q))a='NO VERIFICATION-flowet er lavet til at minimere unødvendig identitetsindsamling i vores egen platform. Krav hos den konkrete tjeneste eller provider kan stadig gælde.';else if(/ordre|order/i.test(q))a='Du kan se dine ordrer under Mine ordrer. Hvis du sender dit ordre-ID til en agent, kan support hjælpe med status.';addChat(a)},350)}
+async function loadAccountData(){
+ if(!tg)return;
+ try{const r=await fetch('/api/me',{headers:{authorization:'tma '+tg.initData}});if(!r.ok)return;const d=await r.json();if(d.user)document.getElementById('profileCredits').textContent=d.user.credits??0}catch{}
+}
+async function loadPrivacy(){try{const r=await fetch('/api/privacy');const d=await r.json();if(d.ok)document.getElementById('privacyContent').insertAdjacentHTML('beforeend','<div class="notice">'+escapeHtml(d.note)+'</div>')}catch{}}
+async function loadStatus(){try{const r=await fetch('/api/service-status');const d=await r.json();const el=document.getElementById('statusList');if(!el||!d.components)return;el.innerHTML=Object.entries(d.components).map(([k,v])=>'<div class="listitem"><b>🟢 '+escapeHtml(k)+'</b><small>'+escapeHtml(String(v))+'</small></div>').join('')}catch{}}
+async function copyReferral(){const link=tg?('https://t.me/'+(window.botUsername||'')+'?start=ref_'+tg.initDataUnsafe?.user?.id):'';if(link)try{await navigator.clipboard.writeText(link);toast('Henvisningslink kopieret')}catch{toast('Henvisningslink kan ikke kopieres endnu')}else toast('Referral aktiveres, når bot-linket er konfigureret')}
 function savePushPreference(enabled){localStorage.setItem('pushEnabled',enabled?'1':'0');toast(enabled?'Telegram-notifikationer aktiveret':'Telegram-notifikationer deaktiveret');if(tg)fetch('/api/notifications/preferences',{method:'POST',headers:{'content-type':'application/json','authorization':'tma '+tg.initData},body:JSON.stringify({enabled})}).catch(()=>{})}
 
 loadVerificationServices();
