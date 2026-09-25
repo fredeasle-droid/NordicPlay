@@ -293,6 +293,7 @@ async function loadVerificationServices(){
     if(!res.ok)throw new Error();
     const data=await res.json();
     const services=Array.isArray(data.services)?data.services:[];
+    if(!services.length)throw new Error('empty_verification_catalog');
     window.verificationServices=services;
     window.verificationVisible=48;
     renderVerificationServices('');
@@ -321,7 +322,7 @@ function renderVerificationServices(query){
   const all=Array.isArray(window.verificationServices)?window.verificationServices:[];
   const q=String(query||'').trim().toLowerCase();
   const filtered=q?all.filter(s=>String(s.name||'').toLowerCase().includes(q)):all;
-  const limit=q?80:(window.verificationVisible||48);
+  const limit=q?filtered.length:(window.verificationVisible||48);
   const shown=filtered.slice(0,limit);
   grid.innerHTML='';
   shown.forEach(s=>{
