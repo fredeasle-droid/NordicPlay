@@ -199,7 +199,8 @@ function selectService(name){toast(name+' valgt');show('verifycountry')}
 function filterServices(q){const s=String(q||'').trim().toLowerCase();let visible=0;document.querySelectorAll('#serviceGrid .service').forEach(el=>{const ok=!s||el.dataset.name.toLowerCase().includes(s);el.classList.toggle('hidden',!ok);if(ok)visible++});const count=document.getElementById('serviceCount');if(count)count.textContent=visible+' services'}
 async function refreshPayment(){const o=window.currentOrder;if(o){document.getElementById('paymentOrderId').textContent=o.id;document.getElementById('paymentAmount').textContent=new Intl.NumberFormat('da-DK').format(o.amountDkk)+' kr.'}}
 
-  if(!tg){toast('Åbn DANSK eSIM fra Telegram');return;}
+async function connectTelegram(){
+  if(!tg)return;
   try{
     const res=await fetch('/api/auth/telegram',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({initData:tg.initData})});
     if(res.ok){toast('Telegram-konto forbundet');}
