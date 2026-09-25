@@ -15,7 +15,7 @@ function auth(req:any){if(!token)return null;const h=String(req.headers.authoriz
 
 app.get("/",async(_req,reply)=>{
   try{
-    const html=await readFile(path.resolve(process.cwd(),"../index.html"),"utf8");
+    const html=await readFile(path.resolve(process.cwd(),"public/index.html"),"utf8");
     return reply.type("text/html; charset=utf-8").send(html);
   }catch{
     return reply.code(404).type("text/plain; charset=utf-8").send("DANSK eSIM frontend ikke fundet");
