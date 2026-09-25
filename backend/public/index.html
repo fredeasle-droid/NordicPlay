@@ -62,9 +62,9 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 
 <section id="order" class="screen"><button class="back" onclick="show('delivery')">← Tilbage</button><div class="eyebrow">Ordre</div><div class="title">Tjek din bestilling</div>
 <div class="summary"><div class="sumrow"><span>Produkt</span><b>Dansk eSIM · Med SMS</b></div><div class="sumrow"><span>Abonnement</span><b>500 kr./md.</b></div><div class="sumrow"><span>Levering</span><b>Express</b></div><div class="sumrow"><span>Kanal</span><b>Telegram</b></div><div class="sumrow"><span>Total</span><b class="total">500 kr.</b></div></div>
-<div class="notice">Dette er en forhåndsvisning. Den endelige pris og leverandørintegration kan ændres, når vores aftaler er på plads.</div><button class="btn" onclick="show('payment')">Fortsæt til betaling →</button></section>
+<div class="notice">Dette er en forhåndsvisning. Den endelige pris og leverandørintegration kan ændres, når vores aftaler er på plads.</div><button class="btn" onclick="createOrder()">Fortsæt til betaling →</button></section>
 
-<section id="payment" class="screen"><button class="back" onclick="show('order')">← Tilbage</button><div class="eyebrow">Betaling</div><div class="title">Betal din ordre</div><div class="summary"><div class="sumrow"><span>Ordre-ID</span><b>DES-2026-0001</b></div><div class="sumrow"><span>Beløb</span><b class="total">500 kr.</b></div></div>
+<section id="payment" class="screen"><button class="back" onclick="show('order')">← Tilbage</button><div class="eyebrow">Betaling</div><div class="title">Betal din ordre</div><div class="summary"><div class="sumrow"><span>Ordre-ID</span><b id="paymentOrderId">Afventer</b></div><div class="sumrow"><span>Beløb</span><b class="total" id="paymentAmount">Afventer</b></div></div>
 <div class="option selected" style="margin-top:12px"><div><b>₿ Crypto</b><div class="mini">Betalingsadresse og netværk vises ved næste trin.</div></div><i class="check"></i></div>
 <button class="btn" onclick="show('proof')">Vis betalingsoplysninger →</button></section>
 
@@ -139,7 +139,19 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 
 <section id="support" class="screen"><div class="eyebrow">Support</div><div class="title">Vi er her for at hjælpe</div><p class="sub">Start med AI-assistenten. Hvis dit spørgsmål kræver en medarbejder, kan du bede om en agent.</p><button class="btn" onclick="openChat()">💬 Åbn supportchat</button><div class="section"><h2>Notifikationer</h2><div class="push-toggle"><div><b>Telegram-notifikationer</b><div class="mini">Tilbud, ordrestatus og påmindelser om fornyelse.</div></div><input id="pushEnabled" type="checkbox" onchange="savePushPreference(this.checked)"></div></div><div class="section"><h2>Hjælp</h2><div class="list"><div class="listitem"><b>📱 Mit nummer</b><small>Aktiv status, minutter og fornyelse.</small></div><div class="listitem"><b>💳 Credits</b><small>Saldo, køb og historik.</small></div><div class="listitem"><b>🔐 Verifikation</b><small>Vælg service, land og antal.</small></div></div></div></section>
 
-<section id="profile" class="screen"><div class="eyebrow">Profil</div><div class="title">Min konto</div><div class="summary"><div class="sumrow"><span>Status</span><b>Aktiv</b></div><div class="sumrow"><span>Telegram</span><b>Forbundet</b></div><div class="sumrow"><span>Credits</span><b>0</b></div></div><div class="section"><button class="btn secondary" onclick="toast('Indstillinger kommer her')">Indstillinger</button><button class="btn ghost" onclick="toast('Support åbnes')">💬 Support</button></div><div class="notice"><b>NO KYC* · PRIVACY FIRST</b><br>Vi bygger platformen med dataminimering som udgangspunkt og indsamler ikke unødvendige identitetsoplysninger i vores eget flow. Provider- og betalingspartnere kan have egne lovpligtige datakrav.</div></section>
+<section id="profile" class="screen"><div class="eyebrow">Profil</div><div class="title">Min konto</div><div class="summary"><div class="sumrow"><span>Status</span><b>Aktiv</b></div><div class="sumrow"><span>Telegram</span><b>Forbundet</b></div><div class="sumrow"><span>Credits</span><b id="profileCredits">0</b></div></div>
+<div class="section"><h2>Hurtige funktioner</h2><div class="grid">
+<div class="card" onclick="loadAccountData();show('orders')"><div class="icon">📦</div><h3>Mine ordrer</h3><p>Status, historik og køb igen.</p></div>
+<div class="card" onclick="show('privacy')"><div class="icon">🔒</div><h3>Privatliv</h3><p>Se hvilke data vi bruger og hvorfor.</p></div>
+<div class="card" onclick="show('status')"><div class="icon">🟢</div><h3>Driftsstatus</h3><p>Platform og provider-status.</p></div>
+<div class="card" onclick="show('credits')"><div class="icon">💳</div><h3>Credit-historik</h3><p>Saldo og bevægelser.</p></div>
+</div></div>
+<div class="section"><h2>Henvis en ven</h2><div class="card feature"><h3>Få bonus ved henvisning</h3><p>Dit personlige henvisningslink bliver aktiveret, når referral-systemet er koblet til betalingsflowet.</p><button class="btn secondary" onclick="copyReferral()">Kopiér henvisningslink</button></div></div>
+<div class="section"><button class="btn secondary" onclick="openChat()">💬 Support</button></div>
+<div class="notice"><b>NO VERIFICATION · PRIVACY FIRST</b><br>Vi bygger platformen med dataminimering som udgangspunkt. Telegram, providers, betalingspartnere og lovkrav kan stadig medføre behandling eller opbevaring af bestemte oplysninger.</div></section>
+
+<section id="privacy" class="screen"><button class="back" onclick="show('profile')">← Tilbage</button><div class="eyebrow">Privatliv</div><div class="title">Privatlivscenter</div><div id="privacyContent" class="list"><div class="listitem"><b>🔒 Dataminimering</b><small>Vi forsøger at undgå unødvendige identitetsoplysninger i vores eget flow.</small></div><div class="listitem"><b>🗑 Aktiv kundedata</b><small>Du kan anmode om deaktivering og sletning af aktiv platformdata. Provider-, betalings- og lovpligtige data kan være underlagt andre regler.</small></div><div class="listitem"><b>📱 Telegram</b><small>Mini App'en modtager de Telegram-oplysninger, som Telegram leverer til Mini App'en.</small></div></div></section>
+<section id="status" class="screen"><button class="back" onclick="show('profile')">← Tilbage</button><div class="eyebrow">Status</div><div class="title">Driftsstatus</div><div id="statusList" class="list"><div class="listitem"><b>🟢 Platform</b><small>Indlæser…</small></div></div></section>
 </main>
 
 <div id="welcomeBubble" class="welcome-bubble"><b>👋 Hej og velkommen!</b><p>Jeg er DANSK eSIMs assistent. Har du spørgsmål, hjælper jeg dig gerne.</p><button class="btn" onclick="openChat()">Start chat</button></div>
@@ -156,11 +168,37 @@ input{width:100%;background:#0e0e0e;border:1px solid #2b2b2b;color:#fff;border-r
 <script>
 const tg=window.Telegram?.WebApp;
 if(tg){tg.ready();tg.expand();tg.setHeaderColor("#080808");tg.setBackgroundColor("#050505");}
-function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));window.scrollTo({top:0,behavior:'smooth'})}
-function selectOpt(el){const p=el.parentElement;p.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));el.classList.add('selected')}
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));if(id==='order')updateOrderPreview();if(id==='payment')refreshPayment();window.scrollTo({top:0,behavior:'smooth'})}
+window.selectedEsim={productId:'sms_1',label:'Dansk eSIM · Med SMS',price:500};
+function selectOpt(el){
+ const p=el.parentElement;p.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');
+ const text=el.innerText;
+ if(/1 nummer/.test(text)&&/500/.test(text))window.selectedEsim={productId:'sms_1',label:'Dansk eSIM · Med SMS',price:500};
+ else if(/2 numre/.test(text))window.selectedEsim={productId:'sms_2',label:'Dansk eSIM · Med SMS · 2 numre',price:800};
+ else if(/3 numre/.test(text))window.selectedEsim={productId:'sms_3',label:'Dansk eSIM · Med SMS · 3 numre',price:1100};
+ else if(/Uden SMS/.test(text)){window.selectedEsim={productId:null,label:'Uden SMS',price:null};toast('Minutpakker kommer, når priserne er fastlagt')}
+}
+function updateOrderPreview(){
+ const p=window.selectedEsim;
+ const rows=document.querySelectorAll('#order .sumrow');
+ if(rows.length>=5){rows[0].querySelector('b').textContent=p.label;rows[1].querySelector('b').textContent=p.price?new Intl.NumberFormat('da-DK').format(p.price)+' kr./md.':'Pris senere';rows[4].querySelector('b').textContent=p.price?new Intl.NumberFormat('da-DK').format(p.price)+' kr.':'Pris senere'}
+}
+async function createOrder(){
+ if(!tg){toast('Åbn Mini Appen fra Telegram');return}
+ const p=window.selectedEsim;if(!p.price){toast('Dette produkt kan først bestilles, når minutpriserne er klar');return}
+ try{
+  const r=await fetch('/api/orders',{method:'POST',headers:{'content-type':'application/json',authorization:'tma '+tg.initData},body:JSON.stringify({productId:p.productId})});
+  const d=await r.json();
+  if(!r.ok){toast('Kunne ikke oprette ordre');return}
+  window.currentOrder=d.order;
+  if(d.firstPurchaseDiscount)toast('50% velkomstrabat er anvendt');
+  show('payment');
+ }catch{toast('Backend er ikke tilgængelig')}
+}
 function selectService(name){toast(name+' valgt');show('verifycountry')}
 function filterServices(q){const s=String(q||'').trim().toLowerCase();let visible=0;document.querySelectorAll('#serviceGrid .service').forEach(el=>{const ok=!s||el.dataset.name.toLowerCase().includes(s);el.classList.toggle('hidden',!ok);if(ok)visible++});const count=document.getElementById('serviceCount');if(count)count.textContent=visible+' services'}
-async function connectTelegram(){
+async function refreshPayment(){const o=window.currentOrder;if(o){document.getElementById('paymentOrderId').textContent=o.id;document.getElementById('paymentAmount').textContent=new Intl.NumberFormat('da-DK').format(o.amountDkk)+' kr.'}}
+
   if(!tg){toast('Åbn DANSK eSIM fra Telegram');return;}
   try{
     const res=await fetch('/api/auth/telegram',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({initData:tg.initData})});
@@ -240,7 +278,7 @@ function fallbackLogo(name){const initial=String(name||"?").trim().slice(0,1).to
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function escapeJs(v){return String(v).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 function selectServiceCode(code,name){window.selectedVerificationService={code,name};document.getElementById('selectedVerifyName').textContent=name;document.getElementById('selectedVerifyMeta').textContent='Service valgt · vælg land';document.getElementById('selectedVerifyBuyName').textContent=name;document.getElementById('selectedVerifyBuyMeta').textContent='Service · '+code;toast(name+' valgt');show('verifycountry')}
-if(tg){connectTelegram();}
+if(tg){connectTelegram();loadAccountData();loadPrivacy();loadStatus();}
 let deferredInstallPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;document.getElementById('installBanner')?.classList.add('show')});
 function installApp(){if(deferredInstallPrompt){deferredInstallPrompt.prompt();deferredInstallPrompt.userChoice.finally(()=>{deferredInstallPrompt=null})}else{toast('På iPhone: Del → Føj til hjemmeskærm')} }
@@ -252,6 +290,13 @@ function closeChat(){document.getElementById('chatPanel')?.classList.remove('ope
 function addChat(text,type='ai'){const b=document.createElement('div');b.className='bubble '+type;b.textContent=text;document.getElementById('chatBody').appendChild(b);document.getElementById('chatBody').scrollTop=99999}
 function chatQuick(q){document.getElementById('chatInput').value=q;sendChat()}
 function sendChat(){const input=document.getElementById('chatInput');const q=input.value.trim();if(!q)return;addChat(q,'user');input.value='';setTimeout(()=>{let a='Jeg kan hjælpe med eSIM, verifikation, credits, ordrestatus og betaling. Hvis du har brug for en medarbejder, skriv “agent”.';if(/agent|medarbejder/i.test(q))a='Selvfølgelig. Jeg sender dig videre til en supportagent. Din samtale kan fortsættes her.';else if(/verification|verifikation|no verification|kyc/i.test(q))a='NO VERIFICATION-flowet er lavet til at minimere unødvendig identitetsindsamling i vores egen platform. Krav hos den konkrete tjeneste eller provider kan stadig gælde.';else if(/ordre|order/i.test(q))a='Du kan se dine ordrer under Mine ordrer. Hvis du sender dit ordre-ID til en agent, kan support hjælpe med status.';addChat(a)},350)}
+async function loadAccountData(){
+ if(!tg)return;
+ try{const r=await fetch('/api/me',{headers:{authorization:'tma '+tg.initData}});if(!r.ok)return;const d=await r.json();if(d.user)document.getElementById('profileCredits').textContent=d.user.credits??0}catch{}
+}
+async function loadPrivacy(){try{const r=await fetch('/api/privacy');const d=await r.json();if(d.ok)document.getElementById('privacyContent').insertAdjacentHTML('beforeend','<div class="notice">'+escapeHtml(d.note)+'</div>')}catch{}}
+async function loadStatus(){try{const r=await fetch('/api/service-status');const d=await r.json();const el=document.getElementById('statusList');if(!el||!d.components)return;el.innerHTML=Object.entries(d.components).map(([k,v])=>'<div class="listitem"><b>🟢 '+escapeHtml(k)+'</b><small>'+escapeHtml(String(v))+'</small></div>').join('')}catch{}}
+async function copyReferral(){const link=tg?('https://t.me/'+(window.botUsername||'')+'?start=ref_'+tg.initDataUnsafe?.user?.id):'';if(link)try{await navigator.clipboard.writeText(link);toast('Henvisningslink kopieret')}catch{toast('Henvisningslink kan ikke kopieres endnu')}else toast('Referral aktiveres, når bot-linket er konfigureret')}
 function savePushPreference(enabled){localStorage.setItem('pushEnabled',enabled?'1':'0');toast(enabled?'Telegram-notifikationer aktiveret':'Telegram-notifikationer deaktiveret');if(tg)fetch('/api/notifications/preferences',{method:'POST',headers:{'content-type':'application/json','authorization':'tma '+tg.initData},body:JSON.stringify({enabled})}).catch(()=>{})}
 
 loadVerificationServices();
