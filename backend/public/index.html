@@ -442,7 +442,8 @@ function dismissInstall(){document.getElementById('installBanner')?.classList.re
 if(localStorage.getItem('installDismissed')!=='1'){document.getElementById('installBanner')?.classList.add('show')}
 const initialScreen=new URL(location.href).searchParams.get('screen');
 if(initialScreen&&document.getElementById(initialScreen))show(initialScreen,{replace:true});
-loadVerificationServices();\ninitChatBubbleDrag();
+loadVerificationServices();
+initChatBubbleDrag();
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>t.style.display='none',2200)}
 </script>
 </body>
