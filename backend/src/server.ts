@@ -14,6 +14,8 @@ const token=process.env.TELEGRAM_BOT_TOKEN;
 const adminSecret=process.env.ADMIN_SECRET;
 const adminChatId=process.env.ADMIN_CHAT_ID;
 const botUsername=process.env.BOT_USERNAME??"";
+const openAiApiKey=process.env.OPENAI_API_KEY??"";
+const openAiModel=process.env.OPENAI_MODEL??"gpt-5.6-luna";
 
 const catalog={
   esim:{
@@ -39,12 +41,63 @@ async function telegramSend(chatId:string,text:string){
   const r=await fetch(`https://api.telegram.org/bot${token}/sendMessage`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chat_id:chatId,text,disable_web_page_preview:true})});
   return r.ok;
 }
+const AI_KNOWLEDGE=`
+Du er DANSK eSIMs kundeservice-assistent. Svar på dansk, naturligt, kort og konkret. Du må ikke opfinde priser, leveringstider, betalingsadresser, provider-status, juridiske krav eller funktioner, som ikke står her. Hvis noget ikke er implementeret eller prisen ikke er fastlagt, sig det tydeligt.
+
+DANSK eSIM:
+- Telegram-first platform med eSIM, SMS-verifikation, credits, ordrestatus, support og referral.
+- Fokus på dataminimering. Vi forsøger at undgå unødvendig persondata i eget flow.
+- Provider-, Telegram-, betalings- og lovpligtige opbevaringskrav kan stadig gælde.
+- Platformen er ikke selv en bookmaker eller betalingsudbyder.
+eSIM:
+- Med SMS: 1 nummer 500 kr./md., 2 numre 800 kr./md., 3 numre 1.100 kr./md.
+- Første eSIM-køb har aktuelt 50% velkomstrabat i ordreflowet.
+- Standard levering har 0 kr. gebyr. Express-gebyr er endnu ikke fastlagt.
+- Levering kan vælges via Telegram eller email.
+- Uden SMS/minutpakker er endnu ikke prissat og kan ikke bestilles endnu.
+- Provider-aktivering er endnu provider-dependent.
+VERIFIKATION:
+- Appen henter services fra NumberOTP og viser servicekataloget dynamisk.
+- Danmark (+45) er den aktive landmulighed. Sverige er planlagt/kommer senere.
+- Credits udløber ikke i det nuværende setup.
+- Kreditpakker: 3, 10, 25, 50 og 100 credits. Priser er endnu ikke fastlagt.
+- Den fulde køb/nummer/SMS-providerintegration er ikke færdigimplementeret endnu; lov ikke brugeren en aktiveret SMS eller et nummer.
+ORDRER/BETALING:
+- Ordrer får et ordre-ID og starter som pending_payment.
+- Betalingsflowet er aktuelt manuel/payment-review-baseret. Ingen automatisk kort/crypto-betaling må loves.
+- Betalingsbevis/TXID-flow er UI/scaffold og skal ikke fremstilles som fuld automatisk betaling.
+SUPPORT:
+- Brugeren kan skrive agent/medarbejder/person for at få sagen sendt videre til support.
+- Ordrestatus findes under Mine ordrer/Profil, når brugeren er logget ind i Telegram Mini App.
+REFERRAL:
+- Referral-link kræver Telegram-login og korrekt BOT_USERNAME-konfiguration.
+- Hvis linket ikke er klar, skal du sige at det ikke er konfigureret endnu.
+PWA:
+- Appen kan installeres som webapp på kompatible enheder.
+- Telegram Mini App fungerer bedst åbnet fra Telegram.
+`;
+
 function aiReply(q:string){
-  if(/agent|medarbejder|person/i.test(q))return "Jeg sender din henvendelse videre til support. En medarbejder kan overtage samtalen her.";
-  if(/verif|kyc|no verification/i.test(q))return "Vores flow er bygget med dataminimering. Krav fra den konkrete tjeneste, provider eller betalingsudbyder kan stadig gælde.";
-  if(/ordre|order/i.test(q))return "Du kan se ordrestatus under Mine ordrer. Send ordre-ID'et til support, hvis du har brug for hjælp.";
-  if(/credit/i.test(q))return "Credits kan købes og bruges til understøttede verifikationer. Credits udløber ikke i det nuværende setup.";
-  return "Jeg kan hjælpe med eSIM, verifikation, credits, ordrestatus og betaling. Skriv “agent”, hvis du vil have en medarbejder.";
+  const s=String(q||"").toLowerCase();
+  if(/agent|medarbejder|person|menneske/i.test(s))return "Jeg sender din henvendelse videre til support. En medarbejder kan overtage samtalen her.";
+  if(/pris|koster|500|800|1100/i.test(s)&&/esim|nummer|sms/i.test(s))return "eSIM med SMS koster aktuelt 500 kr./md. for 1 nummer, 800 kr./md. for 2 numre og 1.100 kr./md. for 3 numre.";
+  if(/credit|credits|saldo/i.test(s))return "Vi har 3, 10, 25, 50 og 100 credits. Credits udløber ikke i det nuværende setup, men priserne er endnu ikke fastlagt.";
+  if(/verif|sms|nummer.*modtag|kode/i.test(s))return "Du kan vælge en tjeneste i App Verifikation. Kataloget hentes dynamisk fra NumberOTP. Danmark (+45) er den aktive landmulighed lige nu.";
+  if(/ordre|order|bestilling|status/i.test(s))return "Du kan se dine ordrer under Profil/Mine ordrer. Send gerne dit ordre-ID, hvis du vil have hjælp til en bestemt ordre.";
+  if(/betaling|betale|txid|crypto|kort/i.test(s))return "Betalingsflowet er aktuelt manuelt/payment-review-baseret. Jeg vil ikke opfinde en betalingsadresse eller betalingsstatus.";
+  if(/privacy|privat|persondata|data|slet/i.test(s))return "DANSK eSIM er bygget med dataminimering som princip. Provider-, Telegram-, betalings- og lovpligtige opbevaringskrav kan stadig gælde.";
+  if(/referral|henvis|ven/i.test(s))return "Referral-funktionen kræver, at du er åbnet via Telegram, og at botens username er konfigureret.";
+  return "Jeg kan hjælpe med eSIM, verifikation, credits, ordrestatus, betaling, privatliv, referral og support. Skriv dit konkrete spørgsmål, så prøver jeg at svare præcist.";
+}
+async function aiReplyWithOpenAI(q:string){
+  if(!openAiApiKey)return aiReply(q);
+  try{
+    const r=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"content-type":"application/json","authorization":"Bearer "+openAiApiKey},body:JSON.stringify({model:openAiModel,input:[{role:"system",content:AI_KNOWLEDGE},{role:"user",content:String(q||"").slice(0,4000)}],max_output_tokens:350})});
+    if(!r.ok)throw new Error("OpenAI request failed: "+r.status);
+    const j=await r.json() as any;
+    const text=j?.output_text??j?.output?.flatMap((x:any)=>x?.content??[]).map((x:any)=>x?.text??"").join("").trim();
+    return text||aiReply(q);
+  }catch(error){app.log.warn({error},"AI support fallback");return aiReply(q);}
 }
 
 app.get("/",async(_req,reply)=>{
@@ -124,10 +177,11 @@ app.post("/api/support/message",async(req,reply)=>{
   const body=req.body as {message?:string;agent?:boolean};const message=String(body?.message??"").trim();
   if(!message)return reply.code(400).send({ok:false,error:"message_required"});
   db.addSupport(user.telegramUserId,"customer",message);
-  const replyText=body?.agent||/agent|medarbejder/i.test(message)?"Jeg har sendt din besked til support. En medarbejder kan overtage her.":aiReply(message);
-  db.addSupport(user.telegramUserId,body?.agent||/agent|medarbejder/i.test(message)?"ai":"ai",replyText);
-  if((body?.agent||/agent|medarbejder/i.test(message))&&adminChatId)await telegramSend(adminChatId,`🆘 DANSK eSIM support\nTelegram bruger: ${user.telegramUserId}\n\n${message}`);
-  return {ok:true,reply:replyText,agentRequested:Boolean(body?.agent||/agent|medarbejder/i.test(message))};
+  const agentRequested=Boolean(body?.agent||/agent|medarbejder|person/i.test(message));
+  const replyText=agentRequested?"Jeg har sendt din besked til support. En medarbejder kan overtage her.":await aiReplyWithOpenAI(message);
+  db.addSupport(user.telegramUserId,"ai",replyText);
+  if(agentRequested&&adminChatId)await telegramSend(adminChatId,`🆘 DANSK eSIM support\nTelegram bruger: ${user.telegramUserId}\n\n${message}`);
+  return {ok:true,reply:replyText,agentRequested};
 });
 
 app.post("/api/favorites/toggle",async(req,reply)=>{
