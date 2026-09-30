@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07100c">
+<title>NordicPlay</title>
+<style>
+:root{--bg:#060a08;--panel:#0c1410;--panel2:#101b15;--line:#1d3025;--green:#35e58a;--green2:#19b968;--text:#f4fff8;--muted:#81968a}
+*{box-sizing:border-box}html,body{margin:0;background:#020503;color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{min-height:100vh}.app{max-width:520px;margin:auto;min-height:100vh;background:radial-gradient(circle at 50% -10%,#123b28 0,#07100b 28%,#040805 62%);padding-bottom:82px}
+header{position:sticky;top:0;z-index:20;height:62px;padding:10px 15px;display:flex;align-items:center;justify-content:space-between;background:rgba(4,9,6,.9);backdrop-filter:blur(18px);border-bottom:1px solid #14251c}.brand{display:flex;align-items:center;gap:8px;font-size:19px;font-weight:950;letter-spacing:-.7px}.brandmark{width:29px;height:29px;border-radius:9px;background:linear-gradient(145deg,#43f49b,#0d8e50);display:grid;place-items:center;color:#031008;font-weight:1000}.right{display:flex;gap:7px;align-items:center}.pill{border:1px solid #244b36;background:#0d1b13;color:#a8c9b6;border-radius:999px;padding:7px 9px;font-size:9px;font-weight:900}.iconbtn{width:34px;height:34px;border:1px solid #23402f;background:#0c1711;border-radius:10px;color:#eafff2}
+main{padding:13px}.hero{position:relative;overflow:hidden;border:1px solid #245239;border-radius:20px;min-height:205px;padding:20px;background:linear-gradient(135deg,#163c29 0,#0b1d14 48%,#07100b 100%);box-shadow:0 16px 50px rgba(0,0,0,.35)}.hero:after{content:"NORDIC";position:absolute;right:-12px;bottom:-28px;font-size:74px;font-weight:1000;letter-spacing:-5px;color:rgba(53,229,138,.06);transform:rotate(-8deg)}.eyebrow{font-size:9px;color:var(--green);font-weight:950;letter-spacing:1.4px;text-transform:uppercase}.hero h1{font-size:30px;line-height:1;margin:8px 0;max-width:300px}.hero p{font-size:11px;color:#b1c5b9;line-height:1.5;max-width:310px}.hero button{border:0;background:var(--green);color:#041008;font-weight:950;border-radius:12px;padding:12px 16px;margin-top:5px}
+.search{margin:13px 0;display:flex;gap:8px}.search input{flex:1;background:#0a120d;border:1px solid #1d3025;color:#fff;border-radius:12px;padding:12px 13px;outline:none}.search button{width:45px;border:1px solid #1d3025;background:#0a120d;color:#fff;border-radius:12px}
+.section{margin-top:20px}.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}.sectionhead h2{font-size:15px;margin:0}.sectionhead span{font-size:9px;color:#7e9888}.scroll{display:flex;gap:9px;overflow:auto;scrollbar-width:none;padding-bottom:2px}.scroll::-webkit-scrollbar{display:none}
+.game{flex:0 0 116px;background:var(--panel);border:1px solid var(--line);border-radius:13px;overflow:hidden;cursor:pointer}.art{height:128px;position:relative;display:flex;align-items:flex-end;padding:8px;background:linear-gradient(145deg,var(--c1),var(--c2));overflow:hidden}.art:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 75% 20%,rgba(255,255,255,.18),transparent 35%)}.art .provider{position:absolute;left:6px;top:6px;background:rgba(0,0,0,.55);padding:4px 5px;border-radius:6px;font-size:6px;font-weight:950;letter-spacing:.3px}.art .symbol{font-size:31px;filter:drop-shadow(0 5px 10px rgba(0,0,0,.45));position:relative}.gameinfo{padding:8px}.gameinfo b{font-size:10px;line-height:1.2;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gameinfo small{display:block;color:#71887a;font-size:7px;margin-top:3px}.play{display:block;margin-top:7px;width:100%;border:0;border-radius:8px;background:#122319;color:var(--green);font-size:8px;font-weight:950;padding:7px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.grid .game{width:auto;min-width:0}.grid .art{height:145px}
+.tabs{display:flex;gap:7px;overflow:auto;margin:12px 0;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab{white-space:nowrap;border:1px solid #1e3227;background:#0a120d;color:#91a699;border-radius:999px;padding:8px 11px;font-size:9px;font-weight:850}.tab.active{background:#173522;color:var(--green);border-color:#2a6543}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);z-index:30;display:grid;grid-template-columns:repeat(5,1fr);padding:8px 7px calc(8px + env(safe-area-inset-bottom));background:rgba(5,10,7,.96);border-top:1px solid #193023;backdrop-filter:blur(18px)}nav button{background:none;border:0;color:#687b70;font-size:8px;font-weight:850}nav button span{display:block;font-size:17px;margin-bottom:2px}nav button.active{color:var(--green)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(10px);z-index:60;display:none;align-items:flex-end}.modal.open{display:flex}.sheet{width:100%;max-width:520px;margin:auto auto 0;background:#08100b;border:1px solid #234630;border-radius:22px 22px 0 0;padding:12px}.modalhead{display:flex;justify-content:space-between;align-items:center;padding:3px 2px 10px}.modalhead b{font-size:13px}.close{border:1px solid #274634;background:#0e1b13;color:#fff;border-radius:9px;width:32px;height:32px}.frame{height:62vh;background:#000;border-radius:15px;overflow:hidden;border:1px solid #1b3024}.frame iframe{width:100%;height:100%;border:0}.note{font-size:8px;color:#6f8577;padding:8px 2px 2px;line-height:1.4}
+@media(min-width:700px){body{padding:20px 0}.app{border:1px solid #14251c;border-radius:25px;overflow:hidden}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="brand"><div class="brandmark">N</div>NORDICPLAY</div><div class="right"><div class="pill">🇩🇰 DK</div><button class="iconbtn">☰</button></div></header>
+<main>
+<section class="hero"><div class="eyebrow">CASINO · LIVE · JACKPOT</div><h1>Spil dine favoritter.</h1><p>Et samlet NordicPlay-univers med populære slots, live casino og nye releases.</p><button onclick="document.getElementById('games').scrollIntoView({behavior:'smooth'})">Udforsk spil →</button></section>
+<div class="search"><input id="search" placeholder="Søg efter spil..." oninput="render()"><button>⌕</button></div>
+<div class="tabs" id="tabs"></div>
+<section class="section"><div class="sectionhead"><h2>🔥 Populære</h2><span>Se alle →</span></div><div class="scroll" id="popular"></div></section>
+<section class="section"><div class="sectionhead"><h2>⭐ Top 10</h2><span>Spillerfavoritter</span></div><div class="scroll" id="top"></div></section>
+<section class="section" id="games"><div class="sectionhead"><h2>🎰 Alle spil</h2><span id="count"></span></div><div class="grid" id="grid"></div></section>
+</main>
+<nav><button class="active"><span>⌂</span>Forside</button><button><span>🎰</span>Spil</button><button><span>🎁</span>Bonus</button><button><span>♡</span>Favoritter</button><button><span>☻</span>Profil</button></nav>
+</div>
+<div class="modal" id="modal" onclick="if(event.target===this)closeGame()"><div class="sheet"><div class="modalhead"><b id="modalTitle"></b><button class="close" onclick="closeGame()">×</button></div><div class="frame"><iframe id="gameFrame" allow="fullscreen"></iframe></div><div class="note">Spilvisningen bruger et provider-/demo-endpoint. Den endelige autoriserede game-session kobles på via provider-adapteren.</div></div></div>
+<script>
+const games=[
+['Gates of Olympus','Pragmatic Play','Slots','⚡','#214e37','#0b1810','https://www.pragmaticplay.fun/en/games/gates-of-olympus-pop/'],
+['Sweet Bonanza','Pragmatic Play','Slots','🍭','#542c55','#17101b','https://www.pragmaticplay.fun/en/games/sweet-bonanza/'],
+['Sugar Rush','Pragmatic Play','Slots','🍬','#51311f','#160f0b','https://www.pragmaticplay.fun/en/games/sugar-rush/'],
+['Big Bass Bonanza','Pragmatic Play','Slots','🐟','#18506a','#07141a','https://www.pragmaticplay.fun/en/games/big-bass-bonanza/'],
+['Big Bass Splash','Pragmatic Play','Slots','🎣','#1c5360','#071517','https://www.pragmaticplay.fun/en/games/big-bass-splash/'],
+['The Dog House Megaways','Pragmatic Play','Slots','🐶','#5a351e','#160d07','https://www.pragmaticplay.fun/en/games/the-dog-house-megaways/'],
+['Starlight Princess','Pragmatic Play','Slots','✨','#40306b','#100b1d','https://www.pragmaticplay.fun/en/games/starlight-princess/'],
+['Wolf Gold','Pragmatic Play','Slots','🐺','#5a421d','#151006','https://www.pragmaticplay.fun/en/games/wolf-gold/'],
+['Buffalo King Megaways','Pragmatic Play','Slots','🐃','#4d3b19','#110e06','https://www.pragmaticplay.fun/en/games/buffalo-king-megaways/'],
+['Spaceman','Pragmatic Play','Arcade','🚀','#2b3566','#0a0d18','https://www.pragmaticplay.fun/en/games/spaceman/'],
+['Gates of Hades','Pragmatic Play','Slots','🔥','#5d1e20','#160706','https://www.pragmaticplay.fun/en/games/gates-of-hades/'],
+['Fortune of Olympus','Pragmatic Play','Slots','🏛️','#4d3a1e','#120e07','https://www.pragmaticplay.fun/en/games/fortune-of-olympus/'],
+['Zeus vs Hades','Pragmatic Play','Slots','⚔️','#44326b','#10091b','https://www.pragmaticplay.fun/en/games/zeus-vs-hades-gods-of-war/'],
+['Sweet Bonanza 1000','Pragmatic Play','Slots','🍓','#63364b','#180c13','https://www.pragmaticplay.fun/en/games/sweet-bonanza-1000/'],
+['Gates of Olympus 1000','Pragmatic Play','Slots','⚡','#3d4f76','#0a101a','https://www.pragmaticplay.fun/en/games/gates-of-olympus-1000/'],
+['Starburst','NetEnt','Slots','💎','#164f5d','#061216',''],
+['Gonzo’s Quest','NetEnt','Slots','🗿','#5a3b20','#120b06',''],
+['Dead or Alive 2','NetEnt','Slots','🤠','#4e2620','#130907',''],
+['Mega Joker','NetEnt','Slots','🃏','#3d4d24','#0c1007',''],
+['Book of Dead','Play’n GO','Slots','📖','#4e341b','#120d06',''],
+['Reactoonz','Play’n GO','Slots','👾','#3e2670','#0e0918',''],
+['Rise of Olympus','Play’n GO','Slots','🏺','#4d391d','#120e07',''],
+['Crazy Time','Evolution','Live','🎡','#513719','#140e08',''],
+['Lightning Roulette','Evolution','Live','⚡','#4c2022','#140707',''],
+['Live Blackjack','Evolution','Live','♠️','#153e29','#07120c',''],
+['Live Roulette','Evolution','Live','🎯','#401c25','#100609',''],
+['Baccarat','Evolution','Live','♦️','#42201e','#100807',''],
+['Dream Catcher','Evolution','Live','🎡','#4a3217','#100b05',''],
+['Monopoly Live','Evolution','Live','🎩','#4a2e18','#100a05',''],
+['Sweet Bonanza CandyLand','Pragmatic Play','Live','🍬','#613450','#180b13','https://www.pragmaticplay.fun/en/games/sweet-bonanza-candyland/']
+];
+const cats=['Alle','Slots','Live','Arcade'];
+let active='Alle';
+const tabs=document.getElementById('tabs');
+tabs.innerHTML=cats.map(c=>'<button class="tab '+(c===active?'active':'')+'" onclick="activeCat(\''+c+'\')">'+c+'</button>').join('');
+function activeCat(c){active=c;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.textContent===c));render()}
+function card(g,i){return '<article class="game" onclick="openGame('+i+')"><div class="art" style="--c1:'+g[4]+';--c2:'+g[5]+'"><span class="provider">'+g[1]+'</span><span class="symbol">'+g[3]+'</span></div><div class="gameinfo"><b>'+g[0]+'</b><small>'+g[1]+' · '+g[2]+'</small><button class="play">SPIL NU</button></div></article>'}
+function render(){const q=document.getElementById('search').value.toLowerCase();const filtered=games.map((g,i)=>[g,i]).filter(([g])=>(active==='Alle'||g[2]===active)&&(!q||g[0].toLowerCase().includes(q)||g[1].toLowerCase().includes(q)));document.getElementById('count').textContent=filtered.length+' spil';document.getElementById('grid').innerHTML=filtered.map(([g,i])=>card(g,i)).join('');document.getElementById('popular').innerHTML=games.slice(0,10).map((g,i)=>card(g,i)).join('');document.getElementById('top').innerHTML=games.slice(0,10).map((g,i)=>card(g,i)).join('')}
+function openGame(i){const g=games[i];document.getElementById('modalTitle').textContent=g[0];const f=document.getElementById('gameFrame');f.src=g[6]||'about:blank';document.getElementById('modal').classList.add('open');if(!g[6])setTimeout(()=>alert('Game-session URL mangler for dette spil. Kataloget er klar; den autoriserede provider-URL skal kobles på.'),50)}
+function closeGame(){document.getElementById('modal').classList.remove('open');document.getElementById('gameFrame').src='about:blank'}
+render();
+</script>
+</body>
+</html>
