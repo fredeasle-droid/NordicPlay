@@ -1,0 +1,11 @@
+{
+  "name": "bethero-odds-isolated-test",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "test:connection": "node src/probe.mjs" },
+  "dependencies": {
+    "@msgpack/msgpack": "^3.1.2",
+    "ws": "^8.18.0"
+  }
+}
